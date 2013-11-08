@@ -1,0 +1,255 @@
+
+R version 3.0.1 (2013-05-16) -- "Good Sport"
+Copyright (C) 2013 The R Foundation for Statistical Computing
+Platform: x86_64-unknown-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> 
+> ## Expanded test script for pedgene package
+> 
+> require(pedgene)
+Loading required package: pedgene
+Loading required package: Matrix
+Loading required package: lattice
+Loading required package: CompQuadForm
+Loading required package: kinship2
+Loading required package: quadprog
+> 
+> data(example.ped)
+> data(example.geno)
+> data(example.map)
+> 
+> ######################################
+> ## From Dan Weeks, issues to check
+> ######################################
+> ## 1) missid ="0" when the rest of the ids are character
+> ## 2) skip pedigree checking, checkpeds=TRUE/FALSE
+> ## 3) character alleles
+> ## 4) disconnected pedigrees
+> ## 5) "flipped" 0/2 geno counts
+> 
+> #########################################################
+> ## Original results for this test case, on non-X chrom.
+> #########################################################
+> ## X-chrom Burden p-val is .00515
+> ## we also do the Davies p-value for the kernel test, so will be slightly different
+> #$stat.kernel pedl
+> #[1] 80.10206
+> #$pval.kernel
+> #[1] 0.4039026
+> #$stat.burden
+> #[1,] 4.895617
+> #$pval.burden
+> #[1,] 0.02692495
+> 
+> ## base case
+> pg.out.m2 <- pedgene(ped=example.ped, geno=example.geno, map=example.map, male.dose=2,
++                      weights=NULL, checkpeds=TRUE)
+> 
+> # summary/print and plot methods for this object
+> print.pedgene(pg.out.m2,digits=3)
+  gene chrom stat.kernel pval.kernel.davies stat.burden pval.burden
+1   AA     1        80.1              0.393        4.90     0.02692
+2   AX     X       198.2              0.178        7.82     0.00515
+> ## standard result to compare against, note pval.kernel.davies different
+> ##    gene chrom stat.kernel pval.kernel stat.burden pval.burden
+> ## AA   AA     1        80.1       0.404        4.90     0.02692
+> ## AX   AX     X       198.2       0.186        7.82     0.00515
+> 
+> ## try making ped1 disconeeded by taking 2nd-generation parents away
+> ## results will differ a little
+> pg.out.m2.rm34 <- pedgene(example.ped[-(3:4),], example.geno, example.map, male.dose=2, checkpeds=FALSE)
+> pg.out.m2.rm34
+  gene chrom stat.kernel pval.kernel.davies stat.burden pval.burden
+1   AA     1    80.10206          0.3511293    5.245304 0.022006084
+2   AX     X   198.18010          0.1599044    8.150547 0.004304818
+> 
+> ## Test character ids, which is robust now because we're now making super-ids by
+> ## pasting ped-person together within the function
+> options(stringsAsFactors=FALSE)
+> char.ped <- with(example.ped, data.frame(ped=as.character(ped), person=as.character(person), father=as.character(father), mother=as.character(mother), sex=sex, trait=trait))
+> options(stringsAsFactors=TRUE)
+> 
+> ## as long as subject and ped ids are character, not factor, this will work
+> ## pedgene makes sure to not treat character as factor 
+> pg.out.m2.char <- pedgene(char.ped, example.geno, example.map, male.dose=2, checkpeds=FALSE)
+> pg.out.m2.char
+  gene chrom stat.kernel pval.kernel.davies stat.burden pval.burden
+1   AA     1    80.10206          0.3925963    4.895617  0.02692495
+2   AX     X   198.18010          0.1777147    7.824525  0.00515420
+> 
+> ## show that it accepts 23 as X, but recodes 23 to X within the function
+> map23 <- example.map
+> map23$chrom[map23$chrom=="X"] <- 23
+> pg.X23.m2 <- pedgene(ped=example.ped, geno=example.geno, map=map23, male.dose=2,
++                      weights=NULL, checkpeds=TRUE)
+> 
+> print(pg.X23.m2, digits=3)
+  gene chrom stat.kernel pval.kernel.davies stat.burden pval.burden
+1   AA     1        80.1              0.393        4.90     0.02692
+2   AX     X       198.2              0.178        7.82     0.00515
+> 
+> # male dose=1
+> pg.out.m1 <- pedgene(example.ped, example.geno, example.map, male.dose=1)
+> 
+> print(pg.out.m1, digits=3)
+  gene chrom stat.kernel pval.kernel.davies stat.burden pval.burden
+1   AA     1        80.1              0.393        4.90      0.0269
+2   AX     X        49.1              0.345        5.29      0.0214
+> ##    gene chrom stat.kernel pval.kernel stat.burden pval.burden
+> ## AA   AA     1      80.102      0.4039      4.8956    0.026925
+> ## AX   AX     X      49.140      0.3568      5.2908    0.021438
+> 
+> 
+> ## test with no map arg (all variants in one gene columns 3:12)
+> pg.out.nomap <- pedgene(example.ped, example.geno[,1:12])
+> pg.out.nomap
+     gene   chrom stat.kernel pval.kernel.davies stat.burden pval.burden
+1 unknown unknown    80.10206          0.3925963    4.895617  0.02692495
+> #      gene   chrom stat.kernel pval.kernel.davies stat.burden pval.burden
+> # 1 unknown unknown      80.102             0.3926      4.8956    0.026925
+> 
+> 
+> ## Testing first gene with dose=2-dose
+> geno.recode <- cbind(example.geno[,1:2], 2-example.geno[,grep("AA", names(example.geno))])
+> pg.recode <- pedgene(example.ped, geno.recode, male.dose=2)
+> 
+> ## note when map not given, assumes all 1 gene, and assigns "unknown" gene/chrom
+> pg.recode
+     gene   chrom stat.kernel pval.kernel.davies stat.burden pval.burden
+1 unknown unknown    80.10206          0.3925963    4.895617  0.02692495
+> 
+> 
+> 
+> ## weights, Madsen-Browning
+> maf <- colMeans(example.geno[,-(1:2)]/2)
+> ## maf not correct for X matrix, b/c n-alleles for males is not 2
+> ## so these results will be a little different for X-chrom
+> 
+> pg.out.wts.m2 <- pedgene(example.ped, example.geno, map=example.map,
++          weights=1/sqrt((maf*(1-maf))))
+> # note stat, pval for AX gene don't match pg.out.m2
+> print(pg.out.wts.m2)
+  gene chrom stat.kernel pval.kernel.davies stat.burden pval.burden
+1   AA     1    80.10206          0.3925963    4.895617 0.026924950
+2   AX     X   322.93950          0.1764537    7.816898 0.005175997
+> 
+> ## plot, consider using the unrelated kernel-clustering plot method to show
+> ##       regions of clustering more than expected,
+> ##       plot gene regions separately
+> 
+> 
+> ## Testing many genes at once:
+> 
+> genobig <- example.geno
+> mapbig <- example.map
+> for(k in 2:20) {
++   genobig <- cbind(genobig, example.geno[,-(1:2)])
++   mapbig <- rbind(mapbig, example.map)
++   mapbig$gene[((k-1)*20+1):(20*k)] <- paste(example.map$gene[1:20],k,sep="")
++ }
+> 
+> 
+> pgbig.m2 <- pedgene(example.ped, genobig, mapbig, male.dose=2)
+> pgbig.m1 <- pedgene(example.ped, genobig, mapbig, male.dose=1)
+> 
+> pgbig.m2
+   gene chrom stat.kernel pval.kernel.davies stat.burden pval.burden
+1    AA     1    80.10206          0.3925963    4.895617  0.02692495
+2    AX     X   198.18010          0.1777147    7.824525  0.00515420
+3   AA2     1    80.10206          0.3925963    4.895617  0.02692495
+4   AX2     X   198.18010          0.1777147    7.824525  0.00515420
+5   AA3     1    80.10206          0.3925963    4.895617  0.02692495
+6   AX3     X   198.18010          0.1777147    7.824525  0.00515420
+7   AA4     1    80.10206          0.3925963    4.895617  0.02692495
+8   AX4     X   198.18010          0.1777147    7.824525  0.00515420
+9   AA5     1    80.10206          0.3925963    4.895617  0.02692495
+10  AX5     X   198.18010          0.1777147    7.824525  0.00515420
+11  AA6     1    80.10206          0.3925963    4.895617  0.02692495
+12  AX6     X   198.18010          0.1777147    7.824525  0.00515420
+13  AA7     1    80.10206          0.3925963    4.895617  0.02692495
+14  AX7     X   198.18010          0.1777147    7.824525  0.00515420
+15  AA8     1    80.10206          0.3925963    4.895617  0.02692495
+16  AX8     X   198.18010          0.1777147    7.824525  0.00515420
+17  AA9     1    80.10206          0.3925963    4.895617  0.02692495
+18  AX9     X   198.18010          0.1777147    7.824525  0.00515420
+19 AA10     1    80.10206          0.3925963    4.895617  0.02692495
+20 AX10     X   198.18010          0.1777147    7.824525  0.00515420
+21 AA11     1    80.10206          0.3925963    4.895617  0.02692495
+22 AX11     X   198.18010          0.1777147    7.824525  0.00515420
+23 AA12     1    80.10206          0.3925963    4.895617  0.02692495
+24 AX12     X   198.18010          0.1777147    7.824525  0.00515420
+25 AA13     1    80.10206          0.3925963    4.895617  0.02692495
+26 AX13     X   198.18010          0.1777147    7.824525  0.00515420
+27 AA14     1    80.10206          0.3925963    4.895617  0.02692495
+28 AX14     X   198.18010          0.1777147    7.824525  0.00515420
+29 AA15     1    80.10206          0.3925963    4.895617  0.02692495
+30 AX15     X   198.18010          0.1777147    7.824525  0.00515420
+31 AA16     1    80.10206          0.3925963    4.895617  0.02692495
+32 AX16     X   198.18010          0.1777147    7.824525  0.00515420
+33 AA17     1    80.10206          0.3925963    4.895617  0.02692495
+34 AX17     X   198.18010          0.1777147    7.824525  0.00515420
+35 AA18     1    80.10206          0.3925963    4.895617  0.02692495
+36 AX18     X   198.18010          0.1777147    7.824525  0.00515420
+37 AA19     1    80.10206          0.3925963    4.895617  0.02692495
+38 AX19     X   198.18010          0.1777147    7.824525  0.00515420
+39 AA20     1    80.10206          0.3925963    4.895617  0.02692495
+40 AX20     X   198.18010          0.1777147    7.824525  0.00515420
+> pgbig.m1
+   gene chrom stat.kernel pval.kernel.davies stat.burden pval.burden
+1    AA     1    80.10206          0.3925963    4.895617  0.02692495
+2    AX     X    49.13969          0.3449891    5.290791  0.02143848
+3   AA2     1    80.10206          0.3925963    4.895617  0.02692495
+4   AX2     X    49.13969          0.3449891    5.290791  0.02143848
+5   AA3     1    80.10206          0.3925963    4.895617  0.02692495
+6   AX3     X    49.13969          0.3449891    5.290791  0.02143848
+7   AA4     1    80.10206          0.3925963    4.895617  0.02692495
+8   AX4     X    49.13969          0.3449891    5.290791  0.02143848
+9   AA5     1    80.10206          0.3925963    4.895617  0.02692495
+10  AX5     X    49.13969          0.3449891    5.290791  0.02143848
+11  AA6     1    80.10206          0.3925963    4.895617  0.02692495
+12  AX6     X    49.13969          0.3449891    5.290791  0.02143848
+13  AA7     1    80.10206          0.3925963    4.895617  0.02692495
+14  AX7     X    49.13969          0.3449891    5.290791  0.02143848
+15  AA8     1    80.10206          0.3925963    4.895617  0.02692495
+16  AX8     X    49.13969          0.3449891    5.290791  0.02143848
+17  AA9     1    80.10206          0.3925963    4.895617  0.02692495
+18  AX9     X    49.13969          0.3449891    5.290791  0.02143848
+19 AA10     1    80.10206          0.3925963    4.895617  0.02692495
+20 AX10     X    49.13969          0.3449891    5.290791  0.02143848
+21 AA11     1    80.10206          0.3925963    4.895617  0.02692495
+22 AX11     X    49.13969          0.3449891    5.290791  0.02143848
+23 AA12     1    80.10206          0.3925963    4.895617  0.02692495
+24 AX12     X    49.13969          0.3449891    5.290791  0.02143848
+25 AA13     1    80.10206          0.3925963    4.895617  0.02692495
+26 AX13     X    49.13969          0.3449891    5.290791  0.02143848
+27 AA14     1    80.10206          0.3925963    4.895617  0.02692495
+28 AX14     X    49.13969          0.3449891    5.290791  0.02143848
+29 AA15     1    80.10206          0.3925963    4.895617  0.02692495
+30 AX15     X    49.13969          0.3449891    5.290791  0.02143848
+31 AA16     1    80.10206          0.3925963    4.895617  0.02692495
+32 AX16     X    49.13969          0.3449891    5.290791  0.02143848
+33 AA17     1    80.10206          0.3925963    4.895617  0.02692495
+34 AX17     X    49.13969          0.3449891    5.290791  0.02143848
+35 AA18     1    80.10206          0.3925963    4.895617  0.02692495
+36 AX18     X    49.13969          0.3449891    5.290791  0.02143848
+37 AA19     1    80.10206          0.3925963    4.895617  0.02692495
+38 AX19     X    49.13969          0.3449891    5.290791  0.02143848
+39 AA20     1    80.10206          0.3925963    4.895617  0.02692495
+40 AX20     X    49.13969          0.3449891    5.290791  0.02143848
+> 
+> 
+> proc.time()
+   user  system elapsed 
+  3.810   0.142   4.073 

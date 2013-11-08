@@ -1,0 +1,11 @@
+import(Matrix)
+import(kinship2)
+import(CompQuadForm)
+export(pedgene,
+       pedgene.stats,
+       quadfactor,
+       print.pedgene, summary.pedgene,
+       pedigreeChecks)
+S3method(print, pedgene)
+S3method(summary, pedgene)
+
