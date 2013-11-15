@@ -64,18 +64,18 @@ Loading required package: CompQuadForm
 > 
 > 
 > print(pg.m2, digits=4)
-  gene chrom stat.kernel pval.kernel.davies stat.burden pval.burden
-1   AA     1        80.1             0.3926       4.896    0.026925
-2   AX     X       198.2             0.1777       7.825    0.005154
+  gene chrom nvariant stat.kernel pval.kernel.davies stat.burden pval.burden
+1   AA     1        7        80.1             0.3926       4.896    0.026925
+2   AX     X        7       198.2             0.1777       7.825    0.005154
 > #  gene chrom stat.kernel pval.kernel stat.burden pval.burden
 > #1   AA     1        80.1      0.4039       4.896    0.026925
 > #2   AX     X       198.2      0.1856       7.825    0.005154
 > 
 > 
 > print(pg.m1, digits=4)
-  gene chrom stat.kernel pval.kernel.davies stat.burden pval.burden
-1   AA     1       80.10             0.3926       4.896     0.02692
-2   AX     X       49.14             0.3450       5.291     0.02144
+  gene chrom nvariant stat.kernel pval.kernel.davies stat.burden pval.burden
+1   AA     1        7       80.10             0.3926       4.896     0.02692
+2   AX     X        7       49.14             0.3450       5.291     0.02144
 > #  gene chrom stat.kernel pval.kernel stat.burden pval.burden
 > #1   AA     1       80.10      0.4039       4.896     0.02692
 > #2   AX     X       49.14      0.3568       5.291     0.02144
@@ -89,9 +89,9 @@ pedgene(ped = example.ped, geno = example.geno, map = example.map,
     male.dose = 2)
 
 
-  gene chrom stat.kernel pval.kernel.davies stat.burden pval.burden
-1   AA     1    80.10206          0.3925963    4.895617  0.02692495
-2   AX     X   198.18010          0.1777147    7.824525  0.00515420
+  gene chrom nvariant stat.kernel pval.kernel.davies stat.burden pval.burden
+1   AA     1        7    80.10206          0.3925961    4.895617  0.02692495
+2   AX     X        7   198.18010          0.1777147    7.824525  0.00515420
 > 
 > 
 > ## Testing first gene with dose=2-dose
@@ -100,11 +100,13 @@ pedgene(ped = example.ped, geno = example.geno, map = example.map,
 > 
 > ## note when map not given, assumes all 1 gene, and assigns "unknown" gene/chrom
 > pg.recode
-     gene   chrom stat.kernel pval.kernel.davies stat.burden pval.burden
-1 unknown unknown    80.10206          0.3925963    4.895617  0.02692495
+     gene   chrom nvariant stat.kernel pval.kernel.davies stat.burden
+1 unknown unknown        7    80.10206          0.3925961    4.895617
+  pval.burden
+1  0.02692495
 > #     gene   chrom stat.kernel pval.kernel stat.burden pval.burden
 > # 1 unknown unknown      80.102      0.4039      4.8956    0.026925
 > 
 > proc.time()
    user  system elapsed 
-  2.284   0.093   2.453 
+  2.320   0.083   2.486 

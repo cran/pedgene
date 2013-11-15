@@ -4,7 +4,8 @@
 ## variants over multiple genes
 ## Authors: Jason Sinnwell and Dan Schaid
 
-pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TRUE) {
+pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TRUE,
+                    acc.davies=1e-5) {
 
 ##Arguments:
 ##  
@@ -161,15 +162,16 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
     kinmatX <- kinmatX[!missidx, !missidx]
   }
   
-  gvec <- chromvec <- kstat <- kpvaldav <- bstat <- bpval <- NULL
+  gvec <- chromvec <- nvariant <- kstat <- kpvaldav <- bstat <- bpval <- NULL
   
   for(g in unique(map$gene)) {
     if(verbose) {
       cat("test on gene ", g, "\n")
     }
     gidx <- which(map$gene==g)
-    genosub <- geno[,gidx]
-    
+    ## JPS add drop=FALSE for 1-marker genes 11/13/13
+    genosub <- geno[,gidx,drop=FALSE]
+
     resid <- ped$trait - ped$trait.adjusted
     sex <- ped$sex
     chrom <- map$chrom[gidx[1]]
@@ -178,18 +180,21 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
              if(chrom=="X") kinmatX else kinmat,
              chrom, resid, sex, male.dose)
 
-    pgstat <- pedgene.stats(genosub, as.vector(c.factor),
-            map$chrom[gidx[1]], male.dose, sex, resid, weights=weights[gidx])
-    
+    pgstat <- pedgene.stats(genosub, as.vector(c.factor), map$chrom[gidx[1]],
+                    male.dose, sex, resid, weights=weights[gidx], acc.davies=acc.davies)
+    if(pgstat$nvariant==0) {
+      cat("gene: '", g, "' has no markers after removing markers with all same genotype\n")
+    }
     gvec <- c(gvec, g)
     chromvec <- c(chromvec, chrom)
+    nvariant <- c(nvariant,pgstat$nvariant)
     kstat <- c(kstat, pgstat$stat.kernel)
     kpvaldav <- c(kpvaldav, pgstat$pval.kernel.davies)
     bstat <- c(bstat, pgstat$stat.burden)
     bpval <- c(bpval, pgstat$pval.burden)   
   }
   
-  pgdf <- data.frame(gene=gvec, chrom=chromvec, stat.kernel=kstat,
+  pgdf <- data.frame(gene=gvec, chrom=chromvec, nvariant=nvariant, stat.kernel=kstat,
                      pval.kernel.davies=kpvaldav,
                      stat.burden=bstat, pval.burden=bpval)
   

@@ -109,16 +109,20 @@ print(pg.out.wts.m2)
 
 genobig <- example.geno
 mapbig <- example.map
-for(k in 2:20) {
+for(k in 2:10) {
   genobig <- cbind(genobig, example.geno[,-(1:2)])
   mapbig <- rbind(mapbig, example.map)
   mapbig$gene[((k-1)*20+1):(20*k)] <- paste(example.map$gene[1:20],k,sep="")
 }
 
+## Add two genes: one with 1 variant. Another with no markers with variance
+genobig <- cbind(genobig, example.geno[,6], rep(1, nrow(example.geno)), rep(2, nrow(example.geno)))
+mapbig <- rbind(mapbig, c(10, "onevar"), c(11,"novar"), c(11, "novar"))
+                
 
 pgbig.m2 <- pedgene(example.ped, genobig, mapbig, male.dose=2)
 pgbig.m1 <- pedgene(example.ped, genobig, mapbig, male.dose=1)
 
-pgbig.m2
-pgbig.m1
+print(pgbig.m2, digits=3)
+print(pgbig.m1, digits=3)
 

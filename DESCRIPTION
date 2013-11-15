@@ -1,8 +1,8 @@
 Package: pedgene
 Type: Package
 Title: Gene-level statistics for Pedigree Data
-Version: 1.1
-Date: 2013-11-8
+Version: 1.2
+Date: 2013-11-15
 Author: Dan Schaid and Jason Sinnwell
 Maintainer: Dan Schaid <schaid@mayo.edu>
 Description: Gene-level association tests with disease status for pedigree data: kernel and burden association statistics.
@@ -10,7 +10,7 @@ License: GPL (>= 2)
 LazyLoad: yes
 Depends: R (>= 2.15.0), stats, Matrix, CompQuadForm, kinship2 (>=
         1.5.3)
-Packaged: 2013-11-08 14:05:11 UTC; sinnwell
+Packaged: 2013-11-18 15:10:17 UTC; sinnwell
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2013-11-08 17:07:50
+Date/Publication: 2013-11-18 16:40:18

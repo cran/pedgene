@@ -13,13 +13,13 @@
   subjects.
 }
 \usage{
-pedgene(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TRUE)
+pedgene(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TRUE, acc.davies=1e-5)
 }
 \arguments{
   \item{ped}{A data.frame with variables that define the pedigree structure
     (typical format used by LINKAGE and PLINK), trait (phenotype), and
     optionally a covariate-adjusted trait (for covariate-adjusted gene
-    level statistics). The variables in the data.frame must be named as
+    level statistics). The columns in the data.frame must be named as
     follows:
     \itemize{
       \item{ped: pedigree ID, character or numeric allowed}
@@ -65,6 +65,11 @@ pedgene(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TRUE)
     weights are applied, where these weights are 1/sqrt(maf*(1-maf))}
   \item{checkpeds}{logical, if FALSE, the method will skip the pedigree
     checking step, which can be intensive for large studies}
+  \item{acc.davies}{Numerical accuracy parameter used in the Davies'
+    method for calculating the kernel test p-value. In some instances, a
+    value of 1e-6 yields kernel test p-values of NA. The default 
+    of 1e-5 performs well, and if NA p-values are observed, a higher
+    value of 1e-4 is suggested}
 }
 \details{
   The pedgene function is a wrapper function to call pedgene.stats on
@@ -76,17 +81,24 @@ pedgene(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TRUE)
   weights based on those suggested by Madsen
   and Browning (weight = 1 / sqrt(maf*(1-maf)), where maf is the minor
   allele frequency for a variant). The burden statistic is based on a
-  weighted sum of variants, also using the Madsen-Browning weights.
+  weighted sum of variants, also using the Madsen-Browning weights. If
+  a gene only has one variant, the kernel test reduces to the burden statistic.
   Variant positions that have zero variance are removed from the
-  analysis because they do not contribute information.
+  analysis because they do not contribute information. 
 }
 \value{
   An object of the pedgene S3 class, with the following elements:
   \item{call: }{function call}
-  \item{pgdf: }{data.frame with gene name, chromosome, kernel and burden
-    test statistics and p-values. Kernel p-values are based on Davies'
+  \item{pgdf: }{data.frame with gene name, chromosome, n-variants per
+    gene(after removing uncessary variants), kernel and burden test
+    statistics and p-values. Kernel p-values are based on Davies'
     method (Davies 1980, reference below), and burden p-values are
-    based on the normal distribution}
+    based on the normal distribution. When a gene has only 1 marker,
+    the kernel test reduces to the burden test. When a gene has no
+    markers after removing zero-variance markers, the gene test
+    stastistics and p-values are all NA.  The Davies p-value can
+    sometimes be NA with a non-NA kernel test statistic; in this case,
+    see the suggestions for the acc.davies argument}
 }
 \references{
 Schaid DJ, McDonnell SK., Sinnwell JP, Thibodeau SN. (2013)

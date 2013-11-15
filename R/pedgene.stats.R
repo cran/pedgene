@@ -6,20 +6,23 @@
 ## Created: 8/2013
 ## Updated: 10/30/2013
 
-
 pedgene.stats <- function(geno, c.factor, chrom, male.dose, sex,
-                          resid, weights=NULL, accuracy.davies=1e-6) {
+                          resid, weights=NULL, acc.davies=1e-6) {
 
     x.chrom <- as.character(chrom)=="X"
     
     # remove monomorphic markers
     v <- apply(geno, 2, var, na.rm=TRUE)
-    geno <- geno[, v > 0]
+    geno <- geno[, v > 0,drop=FALSE]
 
     geno <- as.matrix(geno)
-    if(ncol(geno) == 0) {
-        stop("No data in geno after remove monomorphic markers")
-    }
+    nvariant <- ncol(geno)
+    if(nvariant==0) {
+        return(list(stat.kernel = NA, df.kernel=NA,
+                    pval.kernel = NA,  pval.kernel.davies = NA,
+                     stat.burden = NA, pval.burden = NA,
+                     nvariant = nvariant))
+      }
     
     # Account for missing genotypes. Could exclude subjects with
     # any missing, but  here just replace missing with mean values.
@@ -101,37 +104,48 @@ pedgene.stats <- function(geno, c.factor, chrom, male.dose, sex,
     {
      
       # kernel stat info
-      kmat <- geno %*% diag(wt^2) %*% t(geno)
+      kmat <- geno %*% diag(wt^2,nrow=length(wt),ncol=length(wt)) %*% t(geno)
 
       # Burden stat info
       burden.score.subject <- as.vector(geno %*% wt)
     }
 
-   ########## Quadratic kernel stat
-    
-    stat.kernel <- as.vector(resid %*% kmat %*% resid)
-    
-    scale <- 2*e.Q / var.Q
-    df    <- 2*e.Q^2 / var.Q
-    pval.kernel <- pchisq(stat.kernel*scale, df=df, lower.tail=FALSE)
- 
-    eig <-eigen(var.z, symmetric=T, only.values=T)
-    evals <-eig$values[eig$values>1e-6*eig$values[1]] 
-    pval.kernel.davies <- davies(stat.kernel , evals, acc=accuracy.davies)$Qq
-
-    ########### Burden stat (2-sided)
-     
+    ########### Burden stat (2-sided)     
     stat.num <- (resid %*% burden.score.subject)^2
     factor.sum <- sum(fRmat)    
     stat.denom <- factor.sum * c.factor
     
     burden.stat <- stat.num / stat.denom
     burden.pval <- pchisq(burden.stat, 1,lower.tail=FALSE)
+   
+    ########## Quadratic kernel stat
+    # if only 1 variant, reduces to burden stat
+    if(nvariant>1) {
+      stat.kernel <- as.vector(resid %*% kmat %*% resid)
+      
+      scale <- 2*e.Q / var.Q
+      df    <- 2*e.Q^2 / var.Q
+      pval.kernel <- pchisq(stat.kernel*scale, df=df, lower.tail=FALSE)
+      
+      eig <-eigen(var.z, symmetric=T, only.values=T)
+      evals <-eig$values[eig$values>1e-6*eig$values[1]] 
+      pval.kernel.davies <- davies(stat.kernel , evals, acc=acc.davies)$Qq
+      ## Davies' method sometimes instable, returns out-of-range p-value
+      ## set to NA
+      if( (pval.kernel.davies > 1.0) | (pval.kernel.davies < 0.0) ) {
+        pval.kernel.davies <- NA
+      }
+    } else {
+      stat.kernel <- burden.stat  
+      pval.kernel <- pval.kernel.davies <- burden.pval
+    }     
+    
     lst <- list(stat.kernel = stat.kernel, df.kernel=df,
                      pval.kernel = pval.kernel,
-		     pval.kernel.davies=pval.kernel.davies,
+		     pval.kernel.davies = pval.kernel.davies,
                      stat.burden = burden.stat,
-                     pval.burden = burden.pval)
+                     pval.burden = burden.pval,
+                     nvariant = nvariant)
 
     return(lst)
     

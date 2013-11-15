@@ -1,5 +1,18 @@
 \name{NEWS}
 \title{NEWS file for the pedgene package}
+\section{Release Notes for version 1.2}{
+  \itemize{
+    \item Add argument acc.davies for pedgene. Some kernel tests gave NA
+    p-values with default daves accuracy of 1e-6. Performs well with
+    default of 1e-5, but give option to user in case NAs occur.
+    \item return n-variants for the gene tests, now a column in the returned
+    object from pedgene
+    \item Allow the method to complete if any gene has no markers even
+    after all are removed for having zero variance (same genotype)
+    \item When a gene has only one marker, the kernel test reduces to
+    burden test. Return same test stat and p-value for both.
+  }
+}
 \section{Release Notes for version 1.0}{
   \itemize{
     \item Require ped and person ID columns in genotype data. To match to
