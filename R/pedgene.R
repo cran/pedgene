@@ -83,7 +83,7 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
   ## Check that geno for males on X should only have 0 and 1 dosages
   xidx <- which(map$chrom=="X" | map$chrom=="x")
   if(length(xidx)) {
-    xdosemale <- geno[ped$sex==1,xidx, drop=TRUE]
+    xdosemale <- geno[ped$sex[keepped]==1,xidx, drop=TRUE]
     if(sum(xdosemale>1, na.rm=TRUE)) {
       stop("All male dose on X chromosome should be <= 1")
     }
@@ -127,11 +127,12 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
       }
     }
   }
-  
-  ## additional checks done on peds when creating pedlist object
- # pedall <- with(ped, kinship2::pedigree(id=person, dadid=father, momid=mother,
- #                          sex=sex, famid=ped, missid=missid))
-  
+   ## additional checks could be done on peds when creating pedlist object,
+  ## which could be used to create kinmat. We rather created it directly from ped
+  # pedall <- with(ped, kinship2::pedigree(id=person, dadid=father, momid=mother,
+  #                          sex=sex, famid=ped, missid=missid))
+  #  kinmat <- kinship2::kinship(pedall, chrtype="auto")
+    
 
   ## create kinship matrix, also for X if any genes on X chrom
   ## subset to only those with geno rows
@@ -139,7 +140,6 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
                       dadid=ifelse(father>0,paste(ped,father,sep="-") , as.character(father)),
                       momid=ifelse(mother>0, paste(ped,mother,sep="-"), as.character(mother)),
                       sex=sex, chrtype="autosome")))
-#  kinmat <- kinship2::kinship(pedall, chrtype="auto")
   kinmat <- kinmat[keepped, keepped]
  
   if(any(map$chrom=="X")) {
@@ -160,6 +160,7 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
     ped <- ped[!missidx,]
     kinmat <- kinmat[!missidx, !missidx]
     kinmatX <- kinmatX[!missidx, !missidx]
+    geno <- geno[!missidx,]
   }
   
   gvec <- chromvec <- nvariant <- kstat <- kpvaldav <- bstat <- bpval <- NULL

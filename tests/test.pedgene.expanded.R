@@ -65,6 +65,17 @@ pg.X23.m2 <- pedgene(ped=example.ped, geno=example.geno, map=map23, male.dose=2,
 
 print(pg.X23.m2, digits=3)
 
+
+## geno row with all NA
+geno.narow <- example.geno
+geno.narow[4,3:ncol(example.geno)] <- NA
+# to check if male dose>1 for males on X chrom -- works 
+#geno.narow[3,3:ncol(example.geno)] <- ifelse(geno.narow[3,2:ncol(example.geno)]==0,0,2)
+pg.narow.m2 <- pedgene(ped=example.ped, geno=geno.narow, map=example.map, male.dose=2,
+                     weights=NULL, checkpeds=TRUE)
+print(pg.narow.m2,digits=3)
+
+
 # male dose=1
 pg.out.m1 <- pedgene(example.ped, example.geno, example.map, male.dose=1)
 

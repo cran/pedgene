@@ -1,6 +1,6 @@
 \name{NEWS}
 \title{NEWS file for the pedgene package}
-\section{Release Notes for version 1.2}{
+\section{Release Notes for version 1.3}{
   \itemize{
     \item Add argument acc.davies for pedgene. Some kernel tests gave NA
     p-values with default daves accuracy of 1e-6. Performs well with
@@ -10,7 +10,12 @@
     \item Allow the method to complete if any gene has no markers even
     after all are removed for having zero variance (same genotype)
     \item When a gene has only one marker, the kernel test reduces to
-    burden test. Return same test stat and p-value for both.
+    burden test. Return same test stat and p-value for both. Thanks to
+    Seth Ament.
+    \item Fix bug where failed to subset genotype matrix when either NA
+    in trait or all NA genotypes for a given person, after matching geno
+    and ped subject by ped-person ids. Thanks again to Seth Ament. 
+    \item Change maintainer to Jason, rather than Dan.
   }
 }
 \section{Release Notes for version 1.0}{

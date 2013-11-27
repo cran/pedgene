@@ -1,5 +1,5 @@
 
-R version 3.0.1 (2013-05-16) -- "Good Sport"
+R version 3.0.2 (2013-09-25) -- "Frisbee Sailing"
 Copyright (C) 2013 The R Foundation for Statistical Computing
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
@@ -99,6 +99,20 @@ Loading required package: quadprog
   gene chrom nvariant stat.kernel pval.kernel.davies stat.burden pval.burden
 1   AA     1        7        80.1              0.393        4.90     0.02692
 2   AX     X        7       198.2              0.178        7.82     0.00515
+> 
+> 
+> ## geno row with all NA
+> geno.narow <- example.geno
+> geno.narow[4,3:ncol(example.geno)] <- NA
+> # to check if male dose>1 for males on X chrom -- works 
+> #geno.narow[3,3:ncol(example.geno)] <- ifelse(geno.narow[3,2:ncol(example.geno)]==0,0,2)
+> pg.narow.m2 <- pedgene(ped=example.ped, geno=geno.narow, map=example.map, male.dose=2,
++                      weights=NULL, checkpeds=TRUE)
+> print(pg.narow.m2,digits=3)
+  gene chrom nvariant stat.kernel pval.kernel.davies stat.burden pval.burden
+1   AA     1        7          76              0.361        5.48     0.01923
+2   AX     X        7         182              0.186        8.17     0.00427
+> 
 > 
 > # male dose=1
 > pg.out.m1 <- pedgene(example.ped, example.geno, example.map, male.dose=1)
@@ -226,4 +240,4 @@ gene: ' novar ' has no markers after removing markers with all same genotype
 > 
 > proc.time()
    user  system elapsed 
-  3.410   0.144   3.668 
+  2.918   0.108   3.136 
