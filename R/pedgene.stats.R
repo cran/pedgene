@@ -13,15 +13,17 @@ pedgene.stats <- function(geno, c.factor, chrom, male.dose, sex,
     
     # remove monomorphic markers
     v <- apply(geno, 2, var, na.rm=TRUE)
+    nvariant0 <- ncol(geno)
     geno <- geno[, v > 0,drop=FALSE]
 
     geno <- as.matrix(geno)
     nvariant <- ncol(geno)
+    nvariant.noninform <- nvariant0 - nvariant
     if(nvariant==0) {
         return(list(stat.kernel = NA, df.kernel=NA,
                     pval.kernel = NA,  pval.kernel.davies = NA,
-                     stat.burden = NA, pval.burden = NA,
-                     nvariant = nvariant))
+                    stat.burden = NA, pval.burden = NA,
+                    nvariant = nvariant, noninform=nvariant.noninform))
       }
     
     # Account for missing genotypes. Could exclude subjects with
@@ -145,7 +147,8 @@ pedgene.stats <- function(geno, c.factor, chrom, male.dose, sex,
 		     pval.kernel.davies = pval.kernel.davies,
                      stat.burden = burden.stat,
                      pval.burden = burden.pval,
-                     nvariant = nvariant)
+                     nvariant = nvariant,
+                     noninform=nvariant.noninform)
 
     return(lst)
     

@@ -133,7 +133,6 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
   #                          sex=sex, famid=ped, missid=missid))
   #  kinmat <- kinship2::kinship(pedall, chrtype="auto")
     
-
   ## create kinship matrix, also for X if any genes on X chrom
   ## subset to only those with geno rows
   kinmat <- Matrix(with(ped, kinship(ped, id=paste(ped,person,sep="-"),
@@ -163,7 +162,7 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
     geno <- geno[!missidx,]
   }
   
-  gvec <- chromvec <- nvariant <- kstat <- kpvaldav <- bstat <- bpval <- NULL
+  gvec <- chromvec <- nvariant <- noninform <- kstat <- kpvaldav <- bstat <- bpval <- NULL
   
   for(g in unique(map$gene)) {
     if(verbose) {
@@ -184,18 +183,20 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
     pgstat <- pedgene.stats(genosub, as.vector(c.factor), map$chrom[gidx[1]],
                     male.dose, sex, resid, weights=weights[gidx], acc.davies=acc.davies)
     if(pgstat$nvariant==0) {
-      cat("gene: '", g, "' has no markers after removing markers with all same genotype\n")
+      cat("gene: '", g, "' has no markers after removing markers with all same genotype\n")     
     }
     gvec <- c(gvec, g)
     chromvec <- c(chromvec, chrom)
     nvariant <- c(nvariant,pgstat$nvariant)
+    noninform <- c(noninform, pgstat$noninform)
     kstat <- c(kstat, pgstat$stat.kernel)
     kpvaldav <- c(kpvaldav, pgstat$pval.kernel.davies)
     bstat <- c(bstat, pgstat$stat.burden)
     bpval <- c(bpval, pgstat$pval.burden)   
   }
   
-  pgdf <- data.frame(gene=gvec, chrom=chromvec, nvariant=nvariant, stat.kernel=kstat,
+  pgdf <- data.frame(gene=gvec, chrom=chromvec, n.variant=nvariant,
+                     n.noninform=noninform, stat.kernel=kstat,
                      pval.kernel.davies=kpvaldav,
                      stat.burden=bstat, pval.burden=bpval)
   
@@ -211,13 +212,13 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
 ## print and summary methods for pedgene S3 class
 
 print.pedgene <- function(x, ...) {
- 
+## suggest digits=4  
   print.data.frame(x$pgdf, ...)
 
   invisible()
 }
 summary.pedgene <- function(object, ...) {
-  
+## suggest digits=4 or 5  
   cat("\nSummary for pedgene object: \n\n")
   cat("Call:\n")
   print(object$call)

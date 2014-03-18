@@ -17,7 +17,7 @@ desc <- packageDescription("pedgene")
 ### code chunk number 3: pedgene.Rnw:47-49
 ###################################################
 .libPaths(new = c("/projects/bsi/gentools/R/lib301", .libPaths()))
-library(pedgene, lib=)
+library(pedgene)
 
 
 ###################################################
@@ -51,7 +51,7 @@ example.ped[1:10,]
 
 pg.cc.adj <- pedgene(ped=example.ped, geno=example.geno, map=example.map)
 
-summary(pg.cc.adj)
+summary(pg.cc.adj, digits=4)
 
 
 ###################################################
@@ -63,7 +63,7 @@ beta.sex <- 0.3
 cont.ped$trait <- (cont.ped$sex-1)*beta.sex + rnorm(nrow(cont.ped))
 
 pg.cont <- pedgene(ped = cont.ped, geno = example.geno, map = example.map)
-print(pg.cont)
+print(pg.cont, digits=4)
 
 
 ###################################################
@@ -76,11 +76,11 @@ cont.ped[1:10,]
 
 pg.cont.adj <- pedgene(ped=cont.ped, geno=example.geno, map=example.map)
 
-summary(pg.cont.adj)
+summary(pg.cont.adj, digits=5)
 
 
 ###################################################
-### code chunk number 9: pedgene.Rnw:183-184
+### code chunk number 9: pedgene.Rnw:184-185
 ###################################################
 toLatex(sessionInfo())
 

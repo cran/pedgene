@@ -1,6 +1,6 @@
 \name{NEWS}
 \title{NEWS file for the pedgene package}
-\section{Release Notes for version 1.3}{
+\section{Release Notes for version 1.4}{
   \itemize{
     \item Add argument acc.davies for pedgene. Some kernel tests gave NA
     p-values with default daves accuracy of 1e-6. Performs well with
@@ -16,6 +16,9 @@
     in trait or all NA genotypes for a given person, after matching geno
     and ped subject by ped-person ids. Thanks again to Seth Ament. 
     \item Change maintainer to Jason, rather than Dan.
+    \item Add n.noninform to pedgene object, the number of
+    non-informative markers that were removed
+    
   }
 }
 \section{Release Notes for version 1.0}{
