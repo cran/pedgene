@@ -13,7 +13,10 @@
   subjects.
 }
 \usage{
-pedgene(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TRUE, acc.davies=1e-5)
+pedgene(ped, geno, map=NULL, male.dose=2,
+                    checkpeds=TRUE, verbose.return=FALSE,
+                    weights=NULL, weights.beta=c(1,25), weights.mb=FALSE,
+                    method="kounen", acc.davies=1e-5)
 }
 \arguments{
   \item{ped}{A data.frame with variables that define the pedigree structure
@@ -60,57 +63,95 @@ pedgene(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TRUE, acc.davi
     male.dose = 2 is powerful in the presence of X-chromosome dosage
     compensation in females.
   }
+   \item{checkpeds}{logical, if FALSE, the method will skip the pedigree
+     checking step, which can be intensive for large studies}
+   \item{verbose.return}{logical, if TRUE, return the pedigree, geno,
+     and map objects used in the tests after initial cleanup, e.g., the
+     removal of monomorphic variants. They are returned in the pedgene
+     object in a list called "save"}
+   \item{weights.beta}{ Weights based on a function of the minor allele
+   frequency (maf) and the Beta distribution} 
   \item{weights}{optional user-specified weights, a vector of weights
-    for each variant column of geno (M). If none given, Madsen-Browning
-    weights are applied, where these weights are 1/sqrt(maf*(1-maf))}
-  \item{checkpeds}{logical, if FALSE, the method will skip the pedigree
-    checking step, which can be intensive for large studies}
+    for each variant column of geno. If none given, the Beta weights
+    are applied}
+  \item{weights.mb}{logical, if TRUE and no user-given weights, apply the
+    Madsen-Browning weights per variant: 1/sqrt(maf*(1-maf)). The
+    hierarchy of weights used is 1) user-specified weights, 2)
+    Madsen-Browning if weights.mb=TRUE and weights=NULL, 3) Beta density
+    weights (default if no other weights are set)}
+  \item{method}{method for calculating the kernel test p-value. Kounen's
+    saddlepoint approximation (default) is based on the survey package,
+    and has been found to have less faults (e.g., returned missing
+    value) than  Davies' method (see Chen et al., 2012). The Davies method, 
+    which computes an exact p-value for a mixture of chi-square
+    distributions, is also provided. The accuracy of the Davies method
+    depends on the numerical accuracy parameter (acc.davies), which can
+    be difficult to specify ahead of time.}
   \item{acc.davies}{Numerical accuracy parameter used in the Davies'
     method for calculating the kernel test p-value. In some instances, a
-    value of 1e-6 yields kernel test p-values of NA. The default 
-    of 1e-5 performs well, and if NA p-values are observed, a higher
-    value of 1e-4 is suggested}
+    p-value from the kernel test is out of range, in which case the
+    p-value is set to 0 or 1, depending on which direction the p-value
+    was out of range.}
 }
 \details{
   The pedgene function is a wrapper function to call pedgene.stats on
   one gene at a time. The pedgene.stats function calculates gene-level
   tests for associations with a trait among subjects, accounting for relationships
-  among subjects based on known pedigree relationships. This is achieved
-  by the kinship function in the kinship2 package. The kernel
+  among subjects based on known pedigree relationships (see Schaid et al). 
+  This is achieved by the kinship function in the kinship2 package. The kernel
   association statistic uses a weighted linear kernel, with default
-  weights based on those suggested by Madsen
-  and Browning (weight = 1 / sqrt(maf*(1-maf)), where maf is the minor
-  allele frequency for a variant). The burden statistic is based on a
-  weighted sum of variants, also using the Madsen-Browning weights. If
+  weights based on the beta distribution and sample the minor allele
+  frequency. The burden statistic is based on a weighted sum of variants. If
   a gene only has one variant, the kernel test reduces to the burden statistic.
   Variant positions that have zero variance are removed from the
-  analysis because they do not contribute information. 
+  analysis because they do not contribute information.
 }
 \value{
   An object of the pedgene S3 class, with the following elements:
   \item{call: }{function call}
   \item{pgdf: }{data.frame with gene name, chromosome, n-variants per
-    gene(after removing uncessary variants), kernel and burden test
-    statistics and p-values. Kernel p-values are based on Davies'
-    method (Davies 1980, reference below), and burden p-values are
-    based on the normal distribution. When a gene has only 1 marker,
-    the kernel test reduces to the burden test. When a gene has no
-    markers after removing zero-variance markers, the gene test
-    stastistics and p-values are all NA.  The Davies p-value can
-    sometimes be NA with a non-NA kernel test statistic; in this case,
-    see the suggestions for the acc.davies argument}
+    gene(after removing uncessary variants), n-variants removed per
+    gene, kernel and burden test statistics and p-values. Kernel
+    p-values are based on either Kuonen (1999) or Davies (1980) method.
+    The burden statistic has a standard normal distribution, so the sign
+    of the burden statistic gives information on the direction  of
+    association (positive value implies large burden score are positively 
+    associated with larger trait values).  When a gene has only 1 variant, 
+    the kernel test reduces to the burden test. In this instance, the
+    kernel statistic (chi-square) is the square of the burden statistic
+    (standard normal), with both having the same p-value. When a gene
+    has no markers after removing zero-variance markers, the gene test
+    stastistics and p-values are all NA. 
+  }
+  \item{save: }{If verbose.return was set to TRUE, a list containing the
+    cleaned form of the data that was input to pedgene and is used
+    in the tests: ped, geno, and map}
 }
 \references{
-Schaid DJ, McDonnell SK., Sinnwell JP, Thibodeau SN. (2013)
-Multiple Genetic Variant Association Testing by Collapsing and Kernel
-Methods With Pedigree or Population Structured Data. Genetic Epidemiology, 37(5):409-18.
+  Schaid DJ, McDonnell SK, Sinnwell JP, Thibodeau SN (2013)
+  Multiple Genetic Variant Association Testing by Collapsing and Kernel
+  Methods With Pedigree or Population Structured Data. Genetic
+  Epidemiology, 37(5):409-18.
+  
+  Ozbek U (2012) Statistics for X-chromosome association. 62nd Annual
+  Meeting of The American Society of Human Genetics; Program #22. San
+  Francisco, California.
+  
+  Clayton D (2008) Testing for association on the X chromosome.
+  Biostatistics 9:593-600
 
-Davies R.B. (1980) Algorithm AS 155: The Distribution of a Linear Combination
-of chi-2 Random Variables, Journal of the Royal Statistical
-Society. Series C (Applied Statistics), 29(3):323-33
+  Chen H, Meigs J, Dupuis J (2012) Sequence kernel association test for
+  quantitative traits in family samples. Genetic Epidem 37:196-204
+
+  Kounen D (1999) Saddle point approximatinos for distributions of
+  quadratic forms in normal variables. Biometrika 86:929 -935
+
+  Davies RB (1980) Algorithm AS 155: The Distribution of a Linear
+  Combination of chi-2 Random Variables, Journal of the Royal
+  Statistical Society. Series C (Applied Statistics), 29(3):323-33
 }
 \author{
-Daniel J. Schaid, Jason P. Sinnwell, Mayo Clinic (schaid@mayo.edu).
+Daniel J. Schaid, Jason P. Sinnwell, Mayo Clinic (contact: schaid@mayo.edu).
 }
 \seealso{
 pedigreeChecks, example.ped

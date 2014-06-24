@@ -17,18 +17,39 @@ Type 'q()' to quit R.
 
 > 
 > ## Expanded test script for pedgene package
-> 
-> require(pedgene)
+> devel=FALSE
+> if(devel) {
++   rfiles <- list.files(path="../R/", pattern="*.R$")
++   for(f in rfiles) source(paste("../R/",f,sep=""))
++   dfiles <- list.files(path="../data/", pattern="*.RData$")
++   for(d in dfiles) load(paste("../data/",d,sep=""))
++   library(kinship2)
++   library(survey)
++ } else {
++   
++   require(pedgene)
++   data(example.ped)
++   data(example.geno)
++   data(example.map)
++   
++ }
 Loading required package: pedgene
 Loading required package: Matrix
 Loading required package: lattice
 Loading required package: CompQuadForm
+Loading required package: survey
+
+Attaching package: 'survey'
+
+The following object is masked from 'package:graphics':
+
+    dotchart
+
 Loading required package: kinship2
 Loading required package: quadprog
 > 
-> data(example.ped)
-> data(example.geno)
-> data(example.map)
+> #require(survery)
+> 
 > 
 > ######################################
 > ## From Dan Weeks, issues to check
@@ -53,15 +74,15 @@ Loading required package: quadprog
 > #$pval.burden
 > #[1,] 0.02692495
 > 
-> ## base case
+> ## base case, m-b weights
 > pg.out.m2 <- pedgene(ped=example.ped, geno=example.geno, map=example.map, male.dose=2,
-+                      weights=NULL, checkpeds=TRUE)
++                      weights.mb=TRUE,checkpeds=TRUE)
 > 
 > # summary/print and plot methods for this object
 > print.pedgene(pg.out.m2,digits=3)
-  gene chrom n.variant n.noninform stat.kernel pval.kernel.davies stat.burden
-1   AA     1         7           3        80.1              0.393        4.90
-2   AX     X         7           3       198.2              0.178        7.82
+  gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1   AA     1         7           3        80.1       0.389       -2.21
+2   AX     X         7           3       198.2       0.175       -2.80
   pval.burden
 1     0.02692
 2     0.00515
@@ -70,13 +91,46 @@ Loading required package: quadprog
 > ## AA   AA     1        80.1       0.404        4.90     0.02692
 > ## AX   AX     X       198.2       0.186        7.82     0.00515
 > 
+> ## base case, beta weights, no pedcheck
+> pg.beta.m2 <- pedgene(ped=example.ped, geno=example.geno, map=example.map, male.dose=2, verbose.return=TRUE)
+> names(pg.beta.m2)
+[1] "pgdf" "call" "save"
+> lapply(pg.beta.m2$save, dim)
+$geno
+[1] 18 20
+
+$ped
+[1] 18  7
+
+$map
+[1] 20  2
+
+> 
+> print(pg.beta.m2, digits=4)
+  gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1   AA     1         7           3       144.8      0.3498      -2.048
+2   AX     X         7           3       104.9      0.2320      -2.026
+  pval.burden
+1     0.04061
+2     0.04277
+> 
+> ## base case, mb weights, method=kounen, no pedcheck
+> pg.kounen.m2 <- pedgene(ped=example.ped, geno=example.geno, map=example.map, male.dose=2, weights.mb=TRUE,method="kounen")
+> print(pg.kounen.m2,digits=4)
+  gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1   AA     1         7           3        80.1      0.3894      -2.213
+2   AX     X         7           3       198.2      0.1752      -2.797
+  pval.burden
+1    0.026925
+2    0.005154
+> 
 > ## try making ped1 disconeeded by taking 2nd-generation parents away
 > ## results will differ a little
-> pg.out.m2.rm34 <- pedgene(example.ped[-(3:4),], example.geno, example.map, male.dose=2, checkpeds=FALSE)
+> pg.out.m2.rm34 <- pedgene(example.ped[-(3:4),], example.geno, example.map, male.dose=2, checkpeds=FALSE, weights.mb=TRUE)
 > pg.out.m2.rm34
-  gene chrom n.variant n.noninform stat.kernel pval.kernel.davies stat.burden
-1   AA     1         7           3    80.10206          0.3511292    5.245304
-2   AX     X         7           3   198.18010          0.1599045    8.150547
+  gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1   AA     1         7           3    80.10206   0.3479836   -2.290263
+2   AX     X         7           3   198.18010   0.1575273   -2.854916
   pval.burden
 1 0.022006084
 2 0.004304818
@@ -91,12 +145,12 @@ Loading required package: quadprog
 > ## pedgene makes sure to not treat character as factor 
 > pg.out.m2.char <- pedgene(char.ped, example.geno, example.map, male.dose=2, checkpeds=FALSE)
 > pg.out.m2.char
-  gene chrom n.variant n.noninform stat.kernel pval.kernel.davies stat.burden
-1   AA     1         7           3    80.10206          0.3925961    4.895617
-2   AX     X         7           3   198.18010          0.1777147    7.824525
+  gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1   AA     1         7           3    144.8264   0.3498380   -2.047518
+2   AX     X         7           3    104.9025   0.2320272   -2.025992
   pval.burden
-1  0.02692495
-2  0.00515420
+1  0.04060727
+2  0.04276560
 > 
 > ## show that it accepts 23 as X, but recodes 23 to X within the function
 > map23 <- example.map
@@ -105,12 +159,12 @@ Loading required package: quadprog
 +                      weights=NULL, checkpeds=TRUE)
 > 
 > print(pg.X23.m2, digits=3)
-  gene chrom n.variant n.noninform stat.kernel pval.kernel.davies stat.burden
-1   AA     1         7           3        80.1              0.393        4.90
-2   AX     X         7           3       198.2              0.178        7.82
+  gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1   AA     1         7           3         145       0.350       -2.05
+2   AX     X         7           3         105       0.232       -2.03
   pval.burden
-1     0.02692
-2     0.00515
+1      0.0406
+2      0.0428
 > 
 > 
 > ## geno row with all NA
@@ -119,26 +173,38 @@ Loading required package: quadprog
 > # to check if male dose>1 for males on X chrom -- works 
 > #geno.narow[3,3:ncol(example.geno)] <- ifelse(geno.narow[3,2:ncol(example.geno)]==0,0,2)
 > pg.narow.m2 <- pedgene(ped=example.ped, geno=geno.narow, map=example.map, male.dose=2,
-+                      weights=NULL, checkpeds=TRUE)
++                      weights=NULL, weights.mb=TRUE,checkpeds=TRUE)
 > print(pg.narow.m2,digits=3)
-  gene chrom n.variant n.noninform stat.kernel pval.kernel.davies stat.burden
-1   AA     1         7           3          76              0.361        5.48
-2   AX     X         7           3         182              0.186        8.17
+  gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1   AA     1         7           3          76       0.358       -2.34
+2   AX     X         7           3         182       0.184       -2.86
   pval.burden
 1     0.01923
 2     0.00427
 > 
+> ## choose marker 4 as the 1-snp to represent the gene
+> ## single-snp genes reduce kernel test to burden, check that p-vals agree, stat.kern=stat.burd^2
+> ## This also caused indexing problems in the past.
+> pg.g1.m2 <- pedgene(ped=example.ped, geno=example.geno[,c(1:2,6,13:22)],
++                     map=example.map[c(1,11:20),], male.dose=2,weights.mb=TRUE)
+> pg.g1.m2
+  gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1   AA     1         1           0    1.694118   0.1930591   -1.301583
+2   AX     X         7           3  198.180095   0.1752079   -2.797235
+  pval.burden
+1   0.1930591
+2   0.0051542
 > 
 > # male dose=1
-> pg.out.m1 <- pedgene(example.ped, example.geno, example.map, male.dose=1)
+> pg.out.m1 <- pedgene(example.ped, example.geno, example.map, male.dose=1, )
 > 
 > print(pg.out.m1, digits=3)
-  gene chrom n.variant n.noninform stat.kernel pval.kernel.davies stat.burden
-1   AA     1         7           3        80.1              0.393        4.90
-2   AX     X         7           3        49.1              0.345        5.29
+  gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1   AA     1         7           3       144.8       0.350       -2.05
+2   AX     X         7           3        26.2       0.333       -1.73
   pval.burden
-1      0.0269
-2      0.0214
+1      0.0406
+2      0.0836
 > ##    gene chrom stat.kernel pval.kernel stat.burden pval.burden
 > ## AA   AA     1      80.102      0.4039      4.8956    0.026925
 > ## AX   AX     X      49.140      0.3568      5.2908    0.021438
@@ -147,25 +213,31 @@ Loading required package: quadprog
 > ## test with no map arg (all variants in one gene columns 3:12)
 > pg.out.nomap <- pedgene(example.ped, example.geno[,1:12])
 > pg.out.nomap
-     gene   chrom n.variant n.noninform stat.kernel pval.kernel.davies
-1 unknown unknown         7           3    80.10206          0.3925961
-  stat.burden pval.burden
-1    4.895617  0.02692495
+     gene   chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1 unknown unknown         7           3    144.8264    0.349838   -2.047518
+  pval.burden
+1  0.04060727
 > #      gene   chrom stat.kernel pval.kernel.davies stat.burden pval.burden
 > # 1 unknown unknown      80.102             0.3926      4.8956    0.026925
 > 
 > 
 > ## Testing first gene with dose=2-dose
 > geno.recode <- cbind(example.geno[,1:2], 2-example.geno[,grep("AA", names(example.geno))])
-> pg.recode <- pedgene(example.ped, geno.recode, male.dose=2)
-> 
+> pg.recode.mb <- pedgene(example.ped, geno.recode, male.dose=2, weights.mb=TRUE)
 > ## note when map not given, assumes all 1 gene, and assigns "unknown" gene/chrom
-> pg.recode
-     gene   chrom n.variant n.noninform stat.kernel pval.kernel.davies
-1 unknown unknown         7           3    80.10206          0.3925961
-  stat.burden pval.burden
-1    4.895617  0.02692495
+> pg.recode.mb
+     gene   chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1 unknown unknown         7           3    80.10206   0.3894249    2.212604
+  pval.burden
+1  0.02692495
 > 
+> pg.recode.beta <- pedgene(example.ped, geno.recode, male.dose=2)
+> ## note when map not given, assumes all 1 gene, and assigns "unknown" gene/chrom
+> pg.recode.beta
+     gene   chrom n.variant n.noninform  stat.kernel pval.kernel stat.burden
+1 unknown unknown         7           3 2.472408e-49   0.9986723 0.001904113
+  pval.burden
+1   0.9984807
 > 
 > 
 > ## weights, Madsen-Browning
@@ -177,9 +249,9 @@ Loading required package: quadprog
 +          weights=1/sqrt((maf*(1-maf))))
 > # note stat, pval for AX gene don't match pg.out.m2
 > print(pg.out.wts.m2)
-  gene chrom n.variant n.noninform stat.kernel pval.kernel.davies stat.burden
-1   AA     1         7           3    80.10206          0.3925961    4.895617
-2   AX     X         7           3   322.93950          0.1764537    7.816898
+  gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1   AA     1         7           3    80.10206   0.3894249   -2.212604
+2   AX     X         7           3   322.93950   0.1739781   -2.795872
   pval.burden
 1 0.026924950
 2 0.005175997
@@ -204,107 +276,107 @@ Loading required package: quadprog
 > mapbig <- rbind(mapbig, c(10, "onevar"), c(11,"novar"), c(11, "novar"))
 >                 
 > 
-> pgbig.m2 <- pedgene(example.ped, genobig, mapbig, male.dose=2)
+> pgbig.m2 <- pedgene(example.ped, genobig, mapbig, male.dose=2, acc.davies=1e-4)
 gene: ' novar ' has no markers after removing markers with all same genotype
-> pgbig.m1 <- pedgene(example.ped, genobig, mapbig, male.dose=1)
+> pgbig.m1 <- pedgene(example.ped, genobig, mapbig, male.dose=1, acc.davies=1e-4)
 gene: ' novar ' has no markers after removing markers with all same genotype
 > 
 > print(pgbig.m2, digits=3)
-     gene chrom n.variant n.noninform stat.kernel pval.kernel.davies
-1      AA     1         7           3       80.10              0.393
-2      AX     X         7           3      198.18              0.178
-3     AA2     1         7           3       80.10              0.393
-4     AX2     X         7           3      198.18              0.178
-5     AA3     1         7           3       80.10              0.393
-6     AX3     X         7           3      198.18              0.178
-7     AA4     1         7           3       80.10              0.393
-8     AX4     X         7           3      198.18              0.178
-9     AA5     1         7           3       80.10              0.393
-10    AX5     X         7           3      198.18              0.178
-11    AA6     1         7           3       80.10              0.393
-12    AX6     X         7           3      198.18              0.178
-13    AA7     1         7           3       80.10              0.393
-14    AX7     X         7           3      198.18              0.178
-15    AA8     1         7           3       80.10              0.393
-16    AX8     X         7           3      198.18              0.178
-17    AA9     1         7           3       80.10              0.393
-18    AX9     X         7           3      198.18              0.178
-19   AA10     1         7           3       80.10              0.393
-20   AX10     X         7           3      198.18              0.178
-21 onevar    10         1           0        1.69              0.193
-22  novar    11         0           2          NA                 NA
-   stat.burden pval.burden
-1         4.90     0.02692
-2         7.82     0.00515
-3         4.90     0.02692
-4         7.82     0.00515
-5         4.90     0.02692
-6         7.82     0.00515
-7         4.90     0.02692
-8         7.82     0.00515
-9         4.90     0.02692
-10        7.82     0.00515
-11        4.90     0.02692
-12        7.82     0.00515
-13        4.90     0.02692
-14        7.82     0.00515
-15        4.90     0.02692
-16        7.82     0.00515
-17        4.90     0.02692
-18        7.82     0.00515
-19        4.90     0.02692
-20        7.82     0.00515
-21        1.69     0.19306
-22          NA          NA
+     gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1      AA     1         7           3      144.83       0.350       -2.05
+2      AX     X         7           3      104.90       0.232       -2.03
+3     AA2     1         7           3      144.83       0.350       -2.05
+4     AX2     X         7           3      104.90       0.232       -2.03
+5     AA3     1         7           3      144.83       0.350       -2.05
+6     AX3     X         7           3      104.90       0.232       -2.03
+7     AA4     1         7           3      144.83       0.350       -2.05
+8     AX4     X         7           3      104.90       0.232       -2.03
+9     AA5     1         7           3      144.83       0.350       -2.05
+10    AX5     X         7           3      104.90       0.232       -2.03
+11    AA6     1         7           3      144.83       0.350       -2.05
+12    AX6     X         7           3      104.90       0.232       -2.03
+13    AA7     1         7           3      144.83       0.350       -2.05
+14    AX7     X         7           3      104.90       0.232       -2.03
+15    AA8     1         7           3      144.83       0.350       -2.05
+16    AX8     X         7           3      104.90       0.232       -2.03
+17    AA9     1         7           3      144.83       0.350       -2.05
+18    AX9     X         7           3      104.90       0.232       -2.03
+19   AA10     1         7           3      144.83       0.350       -2.05
+20   AX10     X         7           3      104.90       0.232       -2.03
+21 onevar    10         1           0        1.69       0.193       -1.30
+22  novar    11         0           2          NA          NA          NA
+   pval.burden
+1       0.0406
+2       0.0428
+3       0.0406
+4       0.0428
+5       0.0406
+6       0.0428
+7       0.0406
+8       0.0428
+9       0.0406
+10      0.0428
+11      0.0406
+12      0.0428
+13      0.0406
+14      0.0428
+15      0.0406
+16      0.0428
+17      0.0406
+18      0.0428
+19      0.0406
+20      0.0428
+21      0.1931
+22          NA
 > print(pgbig.m1, digits=3)
-     gene chrom n.variant n.noninform stat.kernel pval.kernel.davies
-1      AA     1         7           3       80.10              0.393
-2      AX     X         7           3       49.14              0.345
-3     AA2     1         7           3       80.10              0.393
-4     AX2     X         7           3       49.14              0.345
-5     AA3     1         7           3       80.10              0.393
-6     AX3     X         7           3       49.14              0.345
-7     AA4     1         7           3       80.10              0.393
-8     AX4     X         7           3       49.14              0.345
-9     AA5     1         7           3       80.10              0.393
-10    AX5     X         7           3       49.14              0.345
-11    AA6     1         7           3       80.10              0.393
-12    AX6     X         7           3       49.14              0.345
-13    AA7     1         7           3       80.10              0.393
-14    AX7     X         7           3       49.14              0.345
-15    AA8     1         7           3       80.10              0.393
-16    AX8     X         7           3       49.14              0.345
-17    AA9     1         7           3       80.10              0.393
-18    AX9     X         7           3       49.14              0.345
-19   AA10     1         7           3       80.10              0.393
-20   AX10     X         7           3       49.14              0.345
-21 onevar    10         1           0        1.69              0.193
-22  novar    11         0           2          NA                 NA
-   stat.burden pval.burden
-1         4.90      0.0269
-2         5.29      0.0214
-3         4.90      0.0269
-4         5.29      0.0214
-5         4.90      0.0269
-6         5.29      0.0214
-7         4.90      0.0269
-8         5.29      0.0214
-9         4.90      0.0269
-10        5.29      0.0214
-11        4.90      0.0269
-12        5.29      0.0214
-13        4.90      0.0269
-14        5.29      0.0214
-15        4.90      0.0269
-16        5.29      0.0214
-17        4.90      0.0269
-18        5.29      0.0214
-19        4.90      0.0269
-20        5.29      0.0214
-21        1.69      0.1931
-22          NA          NA
+     gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1      AA     1         7           3      144.83       0.350       -2.05
+2      AX     X         7           3       26.22       0.333       -1.73
+3     AA2     1         7           3      144.83       0.350       -2.05
+4     AX2     X         7           3       26.22       0.333       -1.73
+5     AA3     1         7           3      144.83       0.350       -2.05
+6     AX3     X         7           3       26.22       0.333       -1.73
+7     AA4     1         7           3      144.83       0.350       -2.05
+8     AX4     X         7           3       26.22       0.333       -1.73
+9     AA5     1         7           3      144.83       0.350       -2.05
+10    AX5     X         7           3       26.22       0.333       -1.73
+11    AA6     1         7           3      144.83       0.350       -2.05
+12    AX6     X         7           3       26.22       0.333       -1.73
+13    AA7     1         7           3      144.83       0.350       -2.05
+14    AX7     X         7           3       26.22       0.333       -1.73
+15    AA8     1         7           3      144.83       0.350       -2.05
+16    AX8     X         7           3       26.22       0.333       -1.73
+17    AA9     1         7           3      144.83       0.350       -2.05
+18    AX9     X         7           3       26.22       0.333       -1.73
+19   AA10     1         7           3      144.83       0.350       -2.05
+20   AX10     X         7           3       26.22       0.333       -1.73
+21 onevar    10         1           0        1.69       0.193       -1.30
+22  novar    11         0           2          NA          NA          NA
+   pval.burden
+1       0.0406
+2       0.0836
+3       0.0406
+4       0.0836
+5       0.0406
+6       0.0836
+7       0.0406
+8       0.0836
+9       0.0406
+10      0.0836
+11      0.0406
+12      0.0836
+13      0.0406
+14      0.0836
+15      0.0406
+16      0.0836
+17      0.0406
+18      0.0836
+19      0.0406
+20      0.0836
+21      0.1931
+22          NA
 > 
 > 
 > proc.time()
    user  system elapsed 
-  4.855   0.159   5.112 
+  5.201   0.204   5.537 

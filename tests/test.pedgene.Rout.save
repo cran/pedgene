@@ -1,5 +1,5 @@
 
-R version 3.0.2 (2013-09-25) -- "Frisbee Sailing"
+R version 3.0.1 (2013-05-16) -- "Good Sport"
 Copyright (C) 2013 The R Foundation for Statistical Computing
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
@@ -30,6 +30,14 @@ Loading required package: quadprog
 > require(pedgene)
 Loading required package: pedgene
 Loading required package: CompQuadForm
+Loading required package: survey
+
+Attaching package: 'survey'
+
+The following object is masked from 'package:graphics':
+
+    dotchart
+
 > 
 > data(example.ped)
 > data(example.geno)
@@ -60,28 +68,28 @@ Loading required package: CompQuadForm
 > class(pg.m2)
 [1] "pedgene"
 > names(pg.m2)
-[1] "pgdf" "call"
+[1] "pgdf" "call" "save"
 > 
 > 
 > print(pg.m2, digits=4)
-  gene chrom n.variant n.noninform stat.kernel pval.kernel.davies stat.burden
-1   AA     1         7           3        80.1             0.3926       4.896
-2   AX     X         7           3       198.2             0.1777       7.825
+  gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1   AA     1         7           3       144.8      0.3498      -2.048
+2   AX     X         7           3       104.9      0.2320      -2.026
   pval.burden
-1    0.026925
-2    0.005154
+1     0.04061
+2     0.04277
 > #  gene chrom stat.kernel pval.kernel stat.burden pval.burden
 > #1   AA     1        80.1      0.4039       4.896    0.026925
 > #2   AX     X       198.2      0.1856       7.825    0.005154
 > 
 > 
 > print(pg.m1, digits=4)
-  gene chrom n.variant n.noninform stat.kernel pval.kernel.davies stat.burden
-1   AA     1         7           3       80.10             0.3926       4.896
-2   AX     X         7           3       49.14             0.3450       5.291
+  gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1   AA     1         7           3      144.83      0.3498      -2.048
+2   AX     X         7           3       26.22      0.3331      -1.730
   pval.burden
-1     0.02692
-2     0.02144
+1     0.04061
+2     0.08359
 > #  gene chrom stat.kernel pval.kernel stat.burden pval.burden
 > #1   AA     1       80.10      0.4039       4.896     0.02692
 > #2   AX     X       49.14      0.3568       5.291     0.02144
@@ -95,12 +103,12 @@ pedgene(ped = example.ped, geno = example.geno, map = example.map,
     male.dose = 2)
 
 
-  gene chrom n.variant n.noninform stat.kernel pval.kernel.davies stat.burden
-1   AA     1         7           3    80.10206          0.3925961    4.895617
-2   AX     X         7           3   198.18010          0.1777147    7.824525
+  gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1   AA     1         7           3    144.8264   0.3498380   -2.047518
+2   AX     X         7           3    104.9025   0.2320272   -2.025992
   pval.burden
-1  0.02692495
-2  0.00515420
+1  0.04060727
+2  0.04276560
 > 
 > 
 > ## Testing first gene with dose=2-dose
@@ -109,13 +117,13 @@ pedgene(ped = example.ped, geno = example.geno, map = example.map,
 > 
 > ## note when map not given, assumes all 1 gene, and assigns "unknown" gene/chrom
 > pg.recode
-     gene   chrom n.variant n.noninform stat.kernel pval.kernel.davies
-1 unknown unknown         7           3    80.10206          0.3925961
-  stat.burden pval.burden
-1    4.895617  0.02692495
+     gene   chrom n.variant n.noninform  stat.kernel pval.kernel stat.burden
+1 unknown unknown         7           3 2.472408e-49   0.9986723 0.001904113
+  pval.burden
+1   0.9984807
 > #     gene   chrom stat.kernel pval.kernel stat.burden pval.burden
 > # 1 unknown unknown      80.102      0.4039      4.8956    0.026925
 > 
 > proc.time()
    user  system elapsed 
-  3.337   0.146   3.558 
+  3.850   0.187   4.110 

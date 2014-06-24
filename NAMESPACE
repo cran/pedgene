@@ -1,6 +1,7 @@
 import(Matrix)
 import(kinship2)
 import(CompQuadForm)
+import(survey)
 export(pedgene,
        pedgene.stats,
        quadfactor,

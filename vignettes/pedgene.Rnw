@@ -102,8 +102,8 @@ print(pg.cc)
 \noindent The results show the output for the two genes in a table, 
 containing gene, chromosome, the number of variants used, the non-informative variants 
 that were removed, the kernel statistic and p-value, and the burden 
-statistic and p-value.  The kernel p-value is calculated using Davies' method~\cite{Davies}, 
-and the burden p-value is based on the normal distribution.
+statistic and p-value.  The kernel p-value is calculated using Kounen's saddlepoint 
+method~\cite{Kounen}, and the burden p-value is based on the normal distribution.
 
 \subsection*{With covariate adjustment}
 
@@ -147,7 +147,7 @@ pg.cont <- pedgene(ped = cont.ped, geno = example.geno, map = example.map)
 print(pg.cont, digits=4)
 @ 
 
-\noindent The results are now insignificant because we simulated
+\noindent The results are now non-significant because we simulated
 a trait that is slightly influenced by sex, but not the genotype data.
 
 \subsection*{With covariate adjustment}
@@ -190,6 +190,10 @@ toLatex(sessionInfo())
 Schaid DJ, McDonnell SK., Sinnwell JP, Thibodeau SN. (2013)
 {\bf Multiple Genetic Variant Association Testing by Collapsing and Kernel Methods 
   With Pedigree or Population Structured Data} {\em Genet Epidemiol}, 37(5):409-18.
+
+\bibitem{Kounen}
+Kounen D (1999) {\bf Saddle point approximatinos for distributions of
+quadratic forms in normal variables} {\em Biometrika}, 86:929 -935.
 
 \bibitem{Davies}
 Davies RB (1980) {\bf Algorithm AS 155: The Distribution of a Linear Combination

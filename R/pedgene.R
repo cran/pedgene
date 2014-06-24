@@ -4,8 +4,9 @@
 ## variants over multiple genes
 ## Authors: Jason Sinnwell and Dan Schaid
 
-pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TRUE,
-                    acc.davies=1e-5) {
+pedgene <- function(ped, geno, map=NULL, male.dose=2, checkpeds=TRUE, verbose.return=FALSE,
+                    weights=NULL, weights.beta=c(1,25), weights.mb=FALSE,
+                    method="kounen", acc.davies=1e-5) {
 
 ##Arguments:
 ##  
@@ -22,9 +23,17 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
 ##        If not passed, assume all variants from the same gene 
 ##  male.dose: When doing X-chrom, define how male genotypes should be
 ##        analyzed. male.dose can be between 0 and 2, but usually 1 or 2
-##  weights: allow user-specified weights. If Null, use Madsen-Browning weights
-
-   
+##  checkpeds, perform basic pedigree structure checks. Time-consuming if peds are
+##             are already validated
+##  method: either Kounen or Davies method to calculate kernel test p-values
+##  verbose.return: similar to glm in R, return geno and response data that is used in calculations
+##  weights: allow user-specified weights. If Null, use beta distribution weighting
+##  weights.mb: if weights=NULL and weights.MB=TRUE, do Madsen-Browning weights
+##  weights.beta: beta distribution coefficients used for weighting.
+##     By default, beta weights are used
+##  acc.davies: numerical accuracy for davies method to choose eigven values
+##       and to determine p-value
+  
 ## Steps
 ## 1) verify ped columns, map and geno match dimensions
 ## 2) Create kinship matrices for autosomes and X for all subjects
@@ -37,6 +46,14 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
   ## save options before setting stringsAsFactors for just this function
   saveOpt <- options()
   options(stringsAsFactors=FALSE)
+
+  ## check method, must be davies or kounen
+  method=casefold(method[1])
+  method=c("kounen","davies")[pmatch(method, c("kounen", "davies"))]
+  if(is.na(method)) {
+    warning("method not kounen or davies, setting to kounen\n")
+    method="kounen"
+  }  
   
   ## require kinship function to be recent
   kin2v <- sessionInfo()$otherPkgs$kinship2$Version
@@ -72,13 +89,12 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
   ## get indices of ped/person of geno to match ped, then strip off those columns
   keepped <- match(paste(geno$ped, geno$person, sep="-"),
                    paste(ped$ped, ped$person, sep="-"))
-  geno <- geno[,!(names(geno) %in% c("ped", "person"))]
+  geno <- geno[,!(names(geno) %in% c("ped", "person")),drop=FALSE]
   
   if(nrow(map) != (ncol(geno))) {
     stop(paste("map rows (", nrow(map), ") and geno columns (", ncol(geno),
                ") do not match \n",sep=""))
-  }
-  
+  }  
 
   ## Check that geno for males on X should only have 0 and 1 dosages
   xidx <- which(map$chrom=="X" | map$chrom=="x")
@@ -99,35 +115,41 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
   if(!("trait.adjusted" %in% names(ped))) {
     ped$trait.adjusted <- mean(ped$trait, na.rm=TRUE)      
   }
-  
-  ## verify weights, match ncol(geno)
+
+  ## check weights parameters
+  ## verify user-passed weights, match ncol(geno)
   if(!is.null(weights)) {
-    ## by default, do Madsen-Browning weights, currently within ped.gene.stats
+    ## by default, do Beta weights, implemented in ped.gene.stats
     ## otherwise, these are user-specified, check length
     if(length(weights) != ncol(geno)) {
        stop(paste("Error: should have weights(", length(weights),
                   ") for every variant position(", ncol(geno), ")", sep=""))
     }
+  } else {  ## no user-given weights
+    if(weights.mb==FALSE) {
+      ## verify weights.beta
+      if(length(weights.beta) != 2 | any(weights.beta < 0)) {
+        warning("weights.beta should be two positive numbers, setting to (1,25)\n")
+        weights.beta=c(1,25)
+      }
+    }  ## m-b weights, nothing to check except that weights.mb is true/false
   }
-
+  
   ## perform simple pedigree checks
   if(checkpeds) {
     uped <- unique(ped$ped)
     nped <- length(uped)
     
-    for(i in 1:nped) {
-      
-      iped <- uped[i]
-      
-      temp.ped <- ped[ped$ped == iped,, drop=FALSE]
-      
+    for(i in 1:nped) {      
+      iped <- uped[i]      
+      temp.ped <- ped[ped$ped == iped,, drop=FALSE]      
       if(nrow(temp.ped) > 1) {      
         ## simple checks on pedigree
         pedigreeChecks(temp.ped, male.code=1, female.code=2)
       }
     }
   }
-   ## additional checks could be done on peds when creating pedlist object,
+  ## additional checks could be done on peds when creating pedlist object,
   ## which could be used to create kinmat. We rather created it directly from ped
   # pedall <- with(ped, kinship2::pedigree(id=person, dadid=father, momid=mother,
   #                          sex=sex, famid=ped, missid=missid))
@@ -162,14 +184,14 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
     geno <- geno[!missidx,]
   }
   
-  gvec <- chromvec <- nvariant <- noninform <- kstat <- kpvaldav <- bstat <- bpval <- NULL
+  gvec <- chromvec <- nvariant <- noninform <- kstat <- kpval <- bstat <- bpval <- NULL
   
   for(g in unique(map$gene)) {
     if(verbose) {
       cat("test on gene ", g, "\n")
     }
     gidx <- which(map$gene==g)
-    ## JPS add drop=FALSE for 1-marker genes 11/13/13
+    ## drop=FALSE for 1-marker gene
     genosub <- geno[,gidx,drop=FALSE]
 
     resid <- ped$trait - ped$trait.adjusted
@@ -180,8 +202,9 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
              if(chrom=="X") kinmatX else kinmat,
              chrom, resid, sex, male.dose)
 
-    pgstat <- pedgene.stats(genosub, as.vector(c.factor), map$chrom[gidx[1]],
-                    male.dose, sex, resid, weights=weights[gidx], acc.davies=acc.davies)
+    pgstat <- pedgene.stats(genosub, as.vector(c.factor), map$chrom[gidx[1]], male.dose, sex, resid,
+                    weights=weights[gidx], weights.beta=weights.beta, weights.mb=weights.mb,
+                    method=method, acc.davies=acc.davies)
     if(pgstat$nvariant==0) {
       cat("gene: '", g, "' has no markers after removing markers with all same genotype\n")     
     }
@@ -190,23 +213,26 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, weights=NULL, checkpeds=TR
     nvariant <- c(nvariant,pgstat$nvariant)
     noninform <- c(noninform, pgstat$noninform)
     kstat <- c(kstat, pgstat$stat.kernel)
-    kpvaldav <- c(kpvaldav, pgstat$pval.kernel.davies)
+    kpval <- c(kpval, pgstat$pval.kernel)
     bstat <- c(bstat, pgstat$stat.burden)
     bpval <- c(bpval, pgstat$pval.burden)   
   }
   
   pgdf <- data.frame(gene=gvec, chrom=chromvec, n.variant=nvariant,
-                     n.noninform=noninform, stat.kernel=kstat,
-                     pval.kernel.davies=kpvaldav,
+                     n.noninform=noninform,
+                     stat.kernel=kstat, pval.kernel=kpval,
                      stat.burden=bstat, pval.burden=bpval)
   
   # re-set options
   options(saveOpt)
-  
-  pglist <- list(pgdf=pgdf, call=call)
+  if(verbose.return) {
+    save <- list(geno=geno, ped=ped, map=map)
+  } else {
+    save=NULL
+  }
+  pglist <- list(pgdf=pgdf, call=call, save=save)
   class(pglist) <- "pedgene"
   return(pglist)
-
 }
 
 ## print and summary methods for pedgene S3 class
