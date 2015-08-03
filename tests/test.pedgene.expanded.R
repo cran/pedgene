@@ -121,6 +121,16 @@ pg.out.nomap
 #      gene   chrom stat.kernel pval.kernel.davies stat.burden pval.burden
 # 1 unknown unknown      80.102             0.3926      4.8956    0.026925
 
+## test with extra subject in geno, make sure it is removed
+example2.geno <- rbind(example.geno[1,],example.geno)
+pg.out <- pedgene(ped=example.ped, geno=example2.geno, map=example.map, male.dose=2,
+                     weights.mb=TRUE,checkpeds=TRUE, method=NA)
+warnings()
+example2.geno[1,1:2] <- c(10,5)
+pg.out <- pedgene(ped=example.ped, geno=example2.geno, map=example.map, male.dose=2,
+                     weights.mb=TRUE,checkpeds=TRUE)
+warnings()
+pg.out
 
 ## Testing first gene with dose=2-dose
 geno.recode <- cbind(example.geno[,1:2], 2-example.geno[,grep("AA", names(example.geno))])

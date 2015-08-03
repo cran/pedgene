@@ -1,5 +1,13 @@
 \name{NEWS}
 \title{NEWS file for the pedgene package}
+\section{Release Notes for version 2.6}{
+  \itemize{
+    \item Make sure character ids stay as character ids
+    \item Bug fix for no relateds
+    \item For X chrom, add check for monomorphic to include within males
+    and females only
+  }
+}
 \section{Release Notes for version 1.4}{
   \itemize{
     \item Add argument acc.davies for pedgene. Some kernel tests gave NA

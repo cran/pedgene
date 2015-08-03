@@ -86,10 +86,31 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, checkpeds=TRUE, verbose.re
   if(any(!(c("ped", "person") %in% names(geno)))) {
     stop("geno requires columns 'ped' and 'person' ids")
   }
+  
   ## get indices of ped/person of geno to match ped, then strip off those columns
   keepped <- match(paste(geno$ped, geno$person, sep="-"),
                    paste(ped$ped, ped$person, sep="-"))
+  tblkeep <- table(keepped)
+
+  ## check for multiple subject entries and not matching a subject
+  if(any(tblkeep > 1)) {
+    warning(paste("subject with multiple entries, only the first is used: ", names(tblkeep)[which(tblkeep>1)], ".\n", sep=""))
+    geno <- geno[!duplicated(paste(geno$ped, geno$person, sep="-")),]
+    keepped <- match(paste(geno$ped, geno$person, sep="-"),
+                     paste(ped$ped, ped$person, sep="-"))
+  }
+
+  if(any(is.na(keepped))) { 
+    warning("removing subject in genotype matrix who is not in pedigree \n")
+    geno <- geno[!is.na(keepped),]
+    keepped <- match(paste(geno$ped, geno$person, sep="-"),
+                     paste(ped$ped, ped$person, sep="-"))
+  }
+  
+  ## after matching, get rid of id cols  
   geno <- geno[,!(names(geno) %in% c("ped", "person")),drop=FALSE]
+
+  ## rm subjects in geno who are not in ped  
   
   if(nrow(map) != (ncol(geno))) {
     stop(paste("map rows (", nrow(map), ") and geno columns (", ncol(geno),
@@ -149,22 +170,23 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, checkpeds=TRUE, verbose.re
       }
     }
   }
-  ## additional checks could be done on peds when creating pedlist object,
-  ## which could be used to create kinmat. We rather created it directly from ped
+  ## additional checks <could> be done on peds when creating pedlist object,
+  ## which could be used to create kinmat.
   # pedall <- with(ped, kinship2::pedigree(id=person, dadid=father, momid=mother,
   #                          sex=sex, famid=ped, missid=missid))
   #  kinmat <- kinship2::kinship(pedall, chrtype="auto")
-    
+
+  ## We rather created it directly from ped  
   ## create kinship matrix, also for X if any genes on X chrom
   ## subset to only those with geno rows
-  kinmat <- Matrix(with(ped, kinship(ped, id=paste(ped,person,sep="-"),
+  kinmat <- Matrix(with(ped, kinship(id=paste(ped,person,sep="-"),
                       dadid=ifelse(father>0,paste(ped,father,sep="-") , as.character(father)),
                       momid=ifelse(mother>0, paste(ped,mother,sep="-"), as.character(mother)),
                       sex=sex, chrtype="autosome")))
   kinmat <- kinmat[keepped, keepped]
  
   if(any(map$chrom=="X")) {
-    kinmatX <- Matrix(with(ped, kinship(ped, id=paste(ped,person,sep="-"),
+    kinmatX <- Matrix(with(ped, kinship(id=paste(ped,person,sep="-"),
                       dadid=ifelse(father>0,paste(ped,father,sep="-") , as.character(father)),
                       momid=ifelse(mother>0, paste(ped,mother,sep="-"), as.character(mother)),
                       sex=sex, chrtype="X")))

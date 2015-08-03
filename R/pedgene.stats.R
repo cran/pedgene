@@ -4,7 +4,7 @@
 ##          on one gene at a time. Wrapper function over multiple genes is pedgene()
 ## Author: Jason Sinnwell
 ## Created: 8/2013
-## Updated: 10/30/2013
+## Updated: 6/4/2015
 
 pedgene.stats <- function(geno, c.factor, chrom, male.dose, sex, resid,
                           weights=NULL, weights.mb=FALSE, weights.beta=c(1,25),
@@ -13,10 +13,17 @@ pedgene.stats <- function(geno, c.factor, chrom, male.dose, sex, resid,
     x.chrom <- as.character(chrom)=="X"
     
     # remove monomorphic markers
-    v <- apply(geno, 2, var, na.rm=TRUE)
+    # for x.chrom, genotype codes may be different so make sure not monomorphic in both sexes
+    if(x.chrom) {
+      v.males <- apply(geno[sex==1,,drop=FALSE], 2, var, na.rm = TRUE)
+      v.females <- apply(geno[sex==2,,drop=FALSE], 2, var, na.rm = TRUE)
+      v <- pmax(v.males, v.females)
+    } else {
+      v <- apply(geno, 2, var, na.rm = TRUE)
+    }
+  
     nvariant0 <- ncol(geno)
     geno <- geno[, v > 0,drop=FALSE]
-
     geno <- as.matrix(geno)
     nvariant <- ncol(geno)
     nvariant.noninform <- nvariant0 - nvariant

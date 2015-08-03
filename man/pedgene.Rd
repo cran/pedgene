@@ -38,7 +38,10 @@ pedgene(ped, geno, map=NULL, male.dose=2,
         trait. If trait.adjusted is present in the data.frame, then
 	gene-level tests are adjusted for covariates using
         residuals = (trait - trait.adjusted). Otherwise, gene-level tests
-        are not adjusted for covariates, in which case residuals = trait - mean(trait)}
+        are not adjusted for covariates, in which case
+	residuals = trait - mean(trait)} where the mean is taken on all
+      subjects passed into pedgene before removing subjects who do not
+      have genotype data.
     }
   }
   \item{geno}{
@@ -100,11 +103,16 @@ pedgene(ped, geno, map=NULL, male.dose=2,
   among subjects based on known pedigree relationships (see Schaid et al). 
   This is achieved by the kinship function in the kinship2 package. The kernel
   association statistic uses a weighted linear kernel, with default
-  weights based on the beta distribution and sample the minor allele
+  weights based on the beta distribution and the sample minor allele
   frequency. The burden statistic is based on a weighted sum of variants. If
   a gene only has one variant, the kernel test reduces to the burden statistic.
   Variant positions that have zero variance are removed from the
   analysis because they do not contribute information.
+
+  Note that if ped contains extra people that are not necessary to
+  define relationships of people with genotype data, their trait value will
+  still be used in mean(trait) in calculating trait.adjusted if trait.adjusted is
+  not given as a column in ped. 
 }
 \value{
   An object of the pedgene S3 class, with the following elements:
@@ -114,7 +122,7 @@ pedgene(ped, geno, map=NULL, male.dose=2,
     gene, kernel and burden test statistics and p-values. Kernel
     p-values are based on either Kuonen (1999) or Davies (1980) method.
     The burden statistic has a standard normal distribution, so the sign
-    of the burden statistic gives information on the direction  of
+    of the burden statistic gives information on the direction of
     association (positive value implies large burden score are positively 
     associated with larger trait values).  When a gene has only 1 variant, 
     the kernel test reduces to the burden test. In this instance, the

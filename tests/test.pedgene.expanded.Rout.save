@@ -1,6 +1,6 @@
 
-R version 3.0.1 (2013-05-16) -- "Good Sport"
-Copyright (C) 2013 The R Foundation for Statistical Computing
+R version 3.1.1 (2014-07-10) -- "Sock it to Me"
+Copyright (C) 2014 The R Foundation for Statistical Computing
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -35,9 +35,9 @@ Type 'q()' to quit R.
 + }
 Loading required package: pedgene
 Loading required package: Matrix
-Loading required package: lattice
 Loading required package: CompQuadForm
 Loading required package: survey
+Loading required package: grid
 
 Attaching package: 'survey'
 
@@ -220,6 +220,24 @@ $map
 > #      gene   chrom stat.kernel pval.kernel.davies stat.burden pval.burden
 > # 1 unknown unknown      80.102             0.3926      4.8956    0.026925
 > 
+> ## test with extra subject in geno, make sure it is removed
+> example2.geno <- rbind(example.geno[1,],example.geno)
+> pg.out <- pedgene(ped=example.ped, geno=example2.geno, map=example.map, male.dose=2,
++                      weights.mb=TRUE,checkpeds=TRUE, method=NA)
+> warnings()
+NULL
+> example2.geno[1,1:2] <- c(10,5)
+> pg.out <- pedgene(ped=example.ped, geno=example2.geno, map=example.map, male.dose=2,
++                      weights.mb=TRUE,checkpeds=TRUE)
+> warnings()
+NULL
+> pg.out
+  gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1   AA     1         7           3    80.10206   0.3894249   -2.212604
+2   AX     X         7           3   198.18010   0.1752079   -2.797235
+  pval.burden
+1  0.02692495
+2  0.00515420
 > 
 > ## Testing first gene with dose=2-dose
 > geno.recode <- cbind(example.geno[,1:2], 2-example.geno[,grep("AA", names(example.geno))])
@@ -379,4 +397,4 @@ gene: ' novar ' has no markers after removing markers with all same genotype
 > 
 > proc.time()
    user  system elapsed 
-  5.201   0.204   5.537 
+  3.156   0.142   3.439 
