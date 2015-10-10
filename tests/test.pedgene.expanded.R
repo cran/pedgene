@@ -153,6 +153,11 @@ pg.out.wts.m2 <- pedgene(example.ped, example.geno, map=example.map,
 # note stat, pval for AX gene don't match pg.out.m2
 print(pg.out.wts.m2)
 
+
+## one column genotype
+pg.out.1snp <- pedgene(example.ped, example.geno[,c(1,2,4),drop=FALSE], map=example.map[2,,drop=FALSE])
+pg.out.1snp
+
 ## plot, consider using the unrelated kernel-clustering plot method to show
 ##       regions of clustering more than expected,
 ##       plot gene regions separately

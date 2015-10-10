@@ -1,5 +1,10 @@
 \name{NEWS}
 \title{NEWS file for the pedgene package}
+\section{Release Notes for version 2.9}{
+  \itemize{
+    \item Use trait.adjusted as mean of trait for those with genotype data
+  }
+}
 \section{Release Notes for version 2.6}{
   \itemize{
     \item Make sure character ids stay as character ids

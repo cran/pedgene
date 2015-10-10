@@ -1,7 +1,7 @@
 
-R version 3.1.1 (2014-07-10) -- "Sock it to Me"
-Copyright (C) 2014 The R Foundation for Statistical Computing
-Platform: x86_64-unknown-linux-gnu (64-bit)
+R Under development (unstable) (2015-08-12 r69024) -- "Unsuffered Consequences"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: i686-pc-linux-gnu (32-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -176,11 +176,11 @@ $map
 +                      weights=NULL, weights.mb=TRUE,checkpeds=TRUE)
 > print(pg.narow.m2,digits=3)
   gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
-1   AA     1         7           3          76       0.358       -2.34
-2   AX     X         7           3         182       0.184       -2.86
+1   AA     1         7           3        66.8       0.445       -2.08
+2   AX     X         7           3       158.7       0.250       -2.58
   pval.burden
-1     0.01923
-2     0.00427
+1     0.03733
+2     0.00988
 > 
 > ## choose marker 4 as the 1-snp to represent the gene
 > ## single-snp genes reduce kernel test to burden, check that p-vals agree, stat.kern=stat.burd^2
@@ -273,6 +273,15 @@ NULL
   pval.burden
 1 0.026924950
 2 0.005175997
+> 
+> 
+> ## one column genotype
+> pg.out.1snp <- pedgene(example.ped, example.geno[,c(1,2,4),drop=FALSE], map=example.map[2,,drop=FALSE])
+> pg.out.1snp
+  gene chrom n.variant n.noninform stat.kernel pval.kernel stat.burden
+1   AA     1         1           0           0           1           0
+  pval.burden
+1           1
 > 
 > ## plot, consider using the unrelated kernel-clustering plot method to show
 > ##       regions of clustering more than expected,
@@ -397,4 +406,4 @@ gene: ' novar ' has no markers after removing markers with all same genotype
 > 
 > proc.time()
    user  system elapsed 
-  3.156   0.142   3.439 
+  2.136   0.148   2.371 

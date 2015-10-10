@@ -95,14 +95,14 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, checkpeds=TRUE, verbose.re
   ## check for multiple subject entries and not matching a subject
   if(any(tblkeep > 1)) {
     warning(paste("subject with multiple entries, only the first is used: ", names(tblkeep)[which(tblkeep>1)], ".\n", sep=""))
-    geno <- geno[!duplicated(paste(geno$ped, geno$person, sep="-")),]
+    geno <- geno[!duplicated(paste(geno$ped, geno$person, sep="-")),,drop=FALSE]
     keepped <- match(paste(geno$ped, geno$person, sep="-"),
                      paste(ped$ped, ped$person, sep="-"))
   }
 
   if(any(is.na(keepped))) { 
     warning("removing subject in genotype matrix who is not in pedigree \n")
-    geno <- geno[!is.na(keepped),]
+    geno <- geno[!is.na(keepped),,drop=FALSE]
     keepped <- match(paste(geno$ped, geno$person, sep="-"),
                      paste(ped$ped, ped$person, sep="-"))
   }
@@ -131,12 +131,12 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, checkpeds=TRUE, verbose.re
            %in% names(ped)))) {
     stop("Error: ped requires columns: ped, person, father, mother, sex, trait")
   }
-   
-  ## add trait.adjusted if not already there
-  if(!("trait.adjusted" %in% names(ped))) {
-    ped$trait.adjusted <- mean(ped$trait, na.rm=TRUE)      
-  }
-
+ 
+  #############################################################################
+  ## this is where to do trait.adjusted if we want it on all people that have trait 
+  ## this caused different results when flipping major/minor alleles, so moved later
+  #############################################################################
+  
   ## check weights parameters
   ## verify user-passed weights, match ncol(geno)
   if(!is.null(weights)) {
@@ -195,6 +195,7 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, checkpeds=TRUE, verbose.re
     kinmatX <- NULL
   }
   ped <- ped[keepped,]
+ 
   
   ## subset pedgeno kinmat, kinmatX to only subject who have genotype data
   missidx <- is.na(ped$trait) | apply(is.na(geno), 1, all) 
@@ -203,7 +204,13 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, checkpeds=TRUE, verbose.re
     ped <- ped[!missidx,]
     kinmat <- kinmat[!missidx, !missidx]
     kinmatX <- kinmatX[!missidx, !missidx]
-    geno <- geno[!missidx,]
+    geno <- geno[!missidx,,drop=FALSE]
+  }
+
+## this is where trait.adjusted should be calculated if its on everyone with genotype data
+  ## add trait.adjusted if not already there
+  if(!("trait.adjusted" %in% names(ped))) {
+    ped$trait.adjusted <- mean(ped$trait, na.rm=TRUE)      
   }
   
   gvec <- chromvec <- nvariant <- noninform <- kstat <- kpval <- bstat <- bpval <- NULL
