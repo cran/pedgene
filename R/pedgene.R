@@ -2,12 +2,11 @@
 ## Functions: pedgene 
 ## wrapper for computing retrospective likelihood stat on pedigrees for rare
 ## variants over multiple genes
-## Authors: Jason Sinnwell and Dan Schaid
+## Authors: Jason Sinnwell, Dan Schaid, and Alessia Visconti
 
-pedgene <- function(ped, geno, map=NULL, male.dose=2, checkpeds=TRUE, verbose.return=FALSE,
-                    weights=NULL, weights.beta=c(1,25), weights.mb=FALSE,
+pedgene <- function(ped, geno,  map=NULL, male.dose=2, checkpeds=TRUE, verbose.return=FALSE,
+                    weights=NULL, weights.beta=c(1,25), weights.mb=FALSE, relation=NULL,
                     method="kounen", acc.davies=1e-5) {
-
 ##Arguments:
 ##  
 ##  Required:
@@ -16,8 +15,7 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, checkpeds=TRUE, verbose.re
 ##       with minor allele count (0/1/2) for markers (columns) and subjects (rows) in
 ##       the ped object
 ##  
-##  Optional:
-##  map: data.frame with columns chrom, position, and gene.
+##  Optional:##  map: data.frame with columns chrom, position, and gene.
 ##        gene can be gene symbol or geneid (entrez or ensemble);
 ##        it is not matched with other annotation, just used for marker groups
 ##        If not passed, assume all variants from the same gene 
@@ -83,32 +81,32 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, checkpeds=TRUE, verbose.re
   map$chrom[map$chrom==23] <- "X"
 
   ## verify geno matrix, and that it matches map
-  if(any(!(c("ped", "person") %in% names(geno)))) {
-    stop("geno requires columns 'ped' and 'person' ids")
+  if(any(!(c("famid", "person") %in% names(geno)))) {
+    stop("geno requires columns 'famid' and 'person' ids")
   }
   
   ## get indices of ped/person of geno to match ped, then strip off those columns
-  keepped <- match(paste(geno$ped, geno$person, sep="-"),
-                   paste(ped$ped, ped$person, sep="-"))
+  keepped <- match(paste(geno$famid, geno$person, sep="-"),
+                   paste(ped$famid, ped$person, sep="-"))
   tblkeep <- table(keepped)
 
   ## check for multiple subject entries and not matching a subject
   if(any(tblkeep > 1)) {
     warning(paste("subject with multiple entries, only the first is used: ", names(tblkeep)[which(tblkeep>1)], ".\n", sep=""))
-    geno <- geno[!duplicated(paste(geno$ped, geno$person, sep="-")),,drop=FALSE]
-    keepped <- match(paste(geno$ped, geno$person, sep="-"),
-                     paste(ped$ped, ped$person, sep="-"))
+    geno <- geno[!duplicated(paste(geno$famid, geno$person, sep="-")),,drop=FALSE]
+    keepped <- match(paste(geno$famid, geno$person, sep="-"),
+                     paste(ped$famid, ped$person, sep="-"))
   }
 
   if(any(is.na(keepped))) { 
     warning("removing subject in genotype matrix who is not in pedigree \n")
     geno <- geno[!is.na(keepped),,drop=FALSE]
-    keepped <- match(paste(geno$ped, geno$person, sep="-"),
-                     paste(ped$ped, ped$person, sep="-"))
+    keepped <- match(paste(geno$famid, geno$person, sep="-"),
+                     paste(ped$famid, ped$person, sep="-"))
   }
   
   ## after matching, get rid of id cols  
-  geno <- geno[,!(names(geno) %in% c("ped", "person")),drop=FALSE]
+  geno <- geno[,!(names(geno) %in% c("famid", "person")),drop=FALSE]
 
   ## rm subjects in geno who are not in ped  
   
@@ -127,9 +125,9 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, checkpeds=TRUE, verbose.re
   }
   
   ## verify ped data.frame has expected column names
-  if(any(!(c("ped", "person", "father", "mother", "sex", "trait")
+  if(any(!(c("famid", "person", "father", "mother", "sex", "trait")
            %in% names(ped)))) {
-    stop("Error: ped requires columns: ped, person, father, mother, sex, trait")
+    stop("Error: ped requires columns: famid, person, father, mother, sex, trait")
   }
  
   #############################################################################
@@ -158,12 +156,12 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, checkpeds=TRUE, verbose.re
   
   ## perform simple pedigree checks
   if(checkpeds) {
-    uped <- unique(ped$ped)
+    uped <- unique(ped$famid)
     nped <- length(uped)
     
     for(i in 1:nped) {      
       iped <- uped[i]      
-      temp.ped <- ped[ped$ped == iped,, drop=FALSE]      
+      temp.ped <- ped[ped$famid == iped,, drop=FALSE]      
       if(nrow(temp.ped) > 1) {      
         ## simple checks on pedigree
         pedigreeChecks(temp.ped, male.code=1, female.code=2)
@@ -179,23 +177,19 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, checkpeds=TRUE, verbose.re
   ## We rather created it directly from ped  
   ## create kinship matrix, also for X if any genes on X chrom
   ## subset to only those with geno rows
-  kinmat <- Matrix(with(ped, kinship(id=paste(ped,person,sep="-"),
-                      dadid=ifelse(father>0,paste(ped,father,sep="-") , as.character(father)),
-                      momid=ifelse(mother>0, paste(ped,mother,sep="-"), as.character(mother)),
-                      sex=sex, chrtype="autosome")))
+  ped2 <- with(ped, pedigree(famid=famid, id=person, dadid=father, momid=mother,
+		sex=sex, missid=0, relation=relation))
+				  
+  kinmat <- Matrix(kinship(ped2, chrtype="autosome"))		 	 
   kinmat <- kinmat[keepped, keepped]
- 
+	  
   if(any(map$chrom=="X")) {
-    kinmatX <- Matrix(with(ped, kinship(id=paste(ped,person,sep="-"),
-                      dadid=ifelse(father>0,paste(ped,father,sep="-") , as.character(father)),
-                      momid=ifelse(mother>0, paste(ped,mother,sep="-"), as.character(mother)),
-                      sex=sex, chrtype="X")))
+    kinmatX <- Matrix(kinship(ped2, chrtype="X"))
     kinmatX <- kinmatX[keepped, keepped]
   } else {
     kinmatX <- NULL
   }
   ped <- ped[keepped,]
- 
   
   ## subset pedgeno kinmat, kinmatX to only subject who have genotype data
   missidx <- is.na(ped$trait) | apply(is.na(geno), 1, all) 
@@ -207,7 +201,7 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, checkpeds=TRUE, verbose.re
     geno <- geno[!missidx,,drop=FALSE]
   }
 
-## this is where trait.adjusted should be calculated if its on everyone with genotype data
+  ## this is where trait.adjusted should be calculated if its on everyone with genotype data
   ## add trait.adjusted if not already there
   if(!("trait.adjusted" %in% names(ped))) {
     ped$trait.adjusted <- mean(ped$trait, na.rm=TRUE)      
@@ -246,7 +240,7 @@ pedgene <- function(ped, geno, map=NULL, male.dose=2, checkpeds=TRUE, verbose.re
     bstat <- c(bstat, pgstat$stat.burden)
     bpval <- c(bpval, pgstat$pval.burden)   
   }
-  
+
   pgdf <- data.frame(gene=gvec, chrom=chromvec, n.variant=nvariant,
                      n.noninform=noninform,
                      stat.kernel=kstat, pval.kernel=kpval,

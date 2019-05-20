@@ -16,7 +16,7 @@ data(example.map)
 if(0) {
 ## delete above line to look at pedigrees
 ## quick look at the 3 pedigrees
-  pedall <- with(example.ped, pedigree(famid=ped, id=person, dadid=father,
+  pedall <- with(example.ped, pedigree(famid=famid, id=person, dadid=father,
                 momid=mother, sex=sex, affected=ifelse(is.na(trait), 0, trait)))
   
   plot(pedall[1])

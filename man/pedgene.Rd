@@ -15,7 +15,8 @@
 \usage{
 pedgene(ped, geno, map=NULL, male.dose=2,
                     checkpeds=TRUE, verbose.return=FALSE,
-                    weights=NULL, weights.beta=c(1,25), weights.mb=FALSE,
+                    weights=NULL, weights.beta=c(1,25),
+                    weights.mb=FALSE, relation=NULL,
                     method="kounen", acc.davies=1e-5)
 }
 \arguments{
@@ -82,6 +83,17 @@ pedgene(ped, geno, map=NULL, male.dose=2,
     hierarchy of weights used is 1) user-specified weights, 2)
     Madsen-Browning if weights.mb=TRUE and weights=NULL, 3) Beta density
     weights (default if no other weights are set)}
+   \item{relation}{
+    Optional data.frame/matrix with 4 columns (id, person1, person2, code) specifying 
+	special relationships between pairs of individuals and used by the kinship 
+	function. Codes are : 
+		1=Monozygotic twin, 
+		2=Dizygotic twin, 
+		3=Twin of unknown zygosity, and
+		4=Spouse. 
+	The last is necessary in order to place a marriage with no children into the 
+	plot. See kinship2::pedigree for details.
+  }
   \item{method}{method for calculating the kernel test p-value. Kounen's
     saddlepoint approximation (default) is based on the survey package,
     and has been found to have less faults (e.g., returned missing
@@ -160,6 +172,7 @@ pedgene(ped, geno, map=NULL, male.dose=2,
 }
 \author{
 Daniel J. Schaid, Jason P. Sinnwell, Mayo Clinic (contact: schaid@mayo.edu).
+Alessia Visconti, King's College London (alessia.visconti@kcl.ac.uk).
 }
 \seealso{
 pedigreeChecks, example.ped

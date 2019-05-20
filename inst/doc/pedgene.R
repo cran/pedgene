@@ -58,7 +58,7 @@ summary(pg.cc.adj, digits=4)
 ### code chunk number 7: continuous
 ###################################################
 set.seed(10)
-cont.ped <- example.ped[,c("ped", "person", "father", "mother", "sex")]
+cont.ped <- example.ped[,c("famid", "person", "father", "mother", "sex")]
 beta.sex <- 0.3
 cont.ped$trait <- (cont.ped$sex-1)*beta.sex + rnorm(nrow(cont.ped))
 
