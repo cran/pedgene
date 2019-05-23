@@ -177,9 +177,13 @@ pedgene <- function(ped, geno,  map=NULL, male.dose=2, checkpeds=TRUE, verbose.r
   ## We rather created it directly from ped  
   ## create kinship matrix, also for X if any genes on X chrom
   ## subset to only those with geno rows
-  ped2 <- with(ped, pedigree(famid=famid, id=person, dadid=father, momid=mother,
+  if(missing(relation)) {
+    ped2 <- with(ped, pedigree(famid=famid, id=person, dadid=father, momid=mother,
+ 		 sex=sex, missid=0))
+  } else  {
+    ped2 <- with(ped, pedigree(famid=famid, id=person, dadid=father, momid=mother,
 		sex=sex, missid=0, relation=relation))
-				  
+  }				  
   kinmat <- Matrix(kinship(ped2, chrtype="autosome"))		 	 
   kinmat <- kinmat[keepped, keepped]
 	  

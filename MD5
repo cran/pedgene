@@ -1,6 +1,6 @@
-77c5ef06edca537cccbc1cce6b6c9963 *DESCRIPTION
+3ae9e92a9c0e65b9c112c53f06d5cf53 *DESCRIPTION
 5258cc5e27045833769a13949d6c283d *NAMESPACE
-7b5a5a81dc7b49948d9176502269e143 *R/pedgene.R
+83a5aa4797c8523b72ac3ab511899bc7 *R/pedgene.R
 a56b6fff58ff03c6f0348981329df0ff *R/pedgene.stats.R
 d00cc2cd67fca797329828c60dadbf69 *R/pedigreeChecks.R
 f4130e254b54f63de01cd9fd871fa624 *R/quadfactor.R
@@ -14,7 +14,7 @@ d368405f1c604912f51ba286eed9944a *inst/GPL.txt
 2c9381922864bba21f04f164cd530ea3 *inst/NEWS.Rd
 4bdcfc161e7fa6ea9e2bb61176b0f9dc *inst/doc/pedgene.R
 e9d72ebd1f0e25a68be24724efbfa95b *inst/doc/pedgene.Rnw
-b6ef052e00c3c7519976483ca85a4e8b *inst/doc/pedgene.pdf
+d86910cb0e07240ae0037281cce4ad2f *inst/doc/pedgene.pdf
 ae9da0e4f0349fe3a0d9ef5e5a71f38a *man/example.geno.Rd
 52181109e577bad4f3f86e35ef53ce98 *man/pedgene.Rd
 ce20776c530a3347cdf7fed017cacc95 *man/pedigreeChecks.Rd
