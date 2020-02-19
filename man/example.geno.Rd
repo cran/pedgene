@@ -21,7 +21,7 @@ data(example.relation)
   \code{example.geno} -data frame with minor allele count for 20 variant
   positions:
   \itemize{
-    \item{\code{famid }}{pedigree family ID, character or numeric}
+    \item{\code{ped }}{pedigree ID, character or numeric}
     \item{\code{person }}{person ID, used with ped to match subjects to
 	their row in example.ped}
     \item{\code{AA.1-AA.10,AX.1-AX.10 }}{genotype columns at 10 positions for
@@ -30,7 +30,7 @@ data(example.relation)
   \code{example.ped} -data frame with pedigree structure and trait
   values in the following columns:
   \itemize{
-    \item{\code{famid}}{pedigree family ID, character or numeric}
+    \item{\code{ped }}{ pedigree ID, character or numeric}
     \item{\code{person }}{ person ID, a unique ID within each pedigree}
     \item{\code{father }}{father ID, 0 if no father}
     \item{\code{mother }}{mother ID, 0 if no mother}
@@ -49,10 +49,10 @@ data(example.relation)
    \item{\code{chrom }}{chromosome code (1-23,X allowed) where the gene is located}
    \item{\code{gene }}{gene identifier}
  }
- \code{example.relation } - data.frame specifying special relationships between pairs 
+ \code{example.relation } - matrix specifying special relationships between pairs 
  	of individuals in the following columns:
     \itemize{
-      \item{\code{famid}}{pedigree family ID, character or numeric}
+      \item{\code{ped }}{pedigree ID, character or numeric}
       \item{\code{id1 }}{person1 ID, used with ped to match subjects to
 	their row in example.ped}
       \item{\code{id2 }}{person2 ID, used with ped to match subjects to

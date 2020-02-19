@@ -26,7 +26,7 @@ pedgene(ped, geno, map=NULL, male.dose=2,
     level statistics). The columns in the data.frame must be named as
     follows:
     \itemize{
-      \item{ped: pedigree ID, character or numeric allowed}
+      \item{famid: pedigree ID, character or numeric allowed}
       \item{person: person ID, a unique ID within each pedigree, numeric
       or character allowed}
       \item{father: father ID, 0 if no father}
@@ -47,7 +47,7 @@ pedgene(ped, geno, map=NULL, male.dose=2,
   }
   \item{geno}{
     Data.frame or matrix with genotypes for subjects (rows) at each variant position
-    (columns). The first two columns are required to be named \code{ped} and
+    (columns). The first two columns are required to be named \code{famid} and
     \code{person}, which are used to match subjects to their data in the
     \code{ped} data.frame. The genotypes are coded as 0, 1, 2 for autosomal
     markers (typically a count of the number of the less-frequent

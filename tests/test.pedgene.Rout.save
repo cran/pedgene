@@ -1,6 +1,6 @@
 
-R version 3.5.2 (2018-12-20) -- "Eggshell Igloo"
-Copyright (C) 2018 The R Foundation for Statistical Computing
+R version 3.6.2 (2019-12-12) -- "Dark and Stormy Night"
+Copyright (C) 2019 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -48,7 +48,7 @@ The following object is masked from 'package:graphics':
 > if(0) {
 + ## delete above line to look at pedigrees
 + ## quick look at the 3 pedigrees
-+   pedall <- with(example.ped, pedigree(famid=famid, id=person, dadid=father,
++   pedall <- with(example.ped, pedigree(famid=ped, id=person, dadid=father,
 +                 momid=mother, sex=sex, affected=ifelse(is.na(trait), 0, trait)))
 +   
 +   plot(pedall[1])
@@ -79,9 +79,6 @@ The following object is masked from 'package:graphics':
   pval.burden
 1     0.04061
 2     0.03019
-> #  gene chrom stat.kernel pval.kernel stat.burden pval.burden
-> #1   AA     1        80.1      0.4039       4.896    0.026925
-> #2   AX     X       198.2      0.1856       7.825    0.005154
 > 
 > 
 > print(pg.m1, digits=4)
@@ -91,9 +88,6 @@ The following object is masked from 'package:graphics':
   pval.burden
 1     0.04061
 2     0.07578
-> #  gene chrom stat.kernel pval.kernel stat.burden pval.burden
-> #1   AA     1       80.10      0.4039       4.896     0.02692
-> #2   AX     X       49.14      0.3568       5.291     0.02144
 > 
 > summary(pg.m2)
 
@@ -111,7 +105,6 @@ pedgene(ped = example.ped, geno = example.geno, map = example.map,
 1  0.04060727
 2  0.03019169
 > 
-> 
 > ## Testing first gene with dose=2-dose
 > geno.recode <- cbind(example.geno[,1:2], 2-example.geno[,grep("AA", names(example.geno))])
 > pg.recode <- pedgene(example.ped, geno.recode, male.dose=2)
@@ -122,9 +115,7 @@ pedgene(ped = example.ped, geno = example.geno, map = example.map,
 1 unknown unknown         7           3 2.472408e-49   0.9986723 0.001904113
   pval.burden
 1   0.9984807
-> #     gene   chrom stat.kernel pval.kernel stat.burden pval.burden
-> # 1 unknown unknown      80.102      0.4039      4.8956    0.026925
 > 
 > proc.time()
    user  system elapsed 
-  2.005   0.248   2.421 
+  1.455   0.142   1.922 

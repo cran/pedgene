@@ -71,7 +71,10 @@ pedgene <- function(ped, geno,  map=NULL, male.dose=2, checkpeds=TRUE, verbose.r
   ## unify names of ped and map to lowercase
   names(map) <- casefold(names(map))
   names(ped) <- casefold(names(ped))
-
+  ## old requirement was to have ped column, change internally to famid
+  names(ped) <- gsub("ped", "famid", names(ped))
+  names(geno) <- gsub("ped", "famid", names(geno))
+    
   ## verify map data.frame ###
   ## i. check column names
   if(any(!(c("chrom", "gene") %in% names(map)))) {

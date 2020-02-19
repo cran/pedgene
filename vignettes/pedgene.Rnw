@@ -45,7 +45,7 @@ library(pedgene)
 @
 
 <<echo=FALSE, eval=TRUE>>=
-.libPaths(new = c("/projects/bsi/gentools/R/lib301", .libPaths()))
+.libPaths(new = c("~/Rlib362", .libPaths()))
 library(pedgene)
 @
 
@@ -63,7 +63,6 @@ Three example data frames are provided within the pedgene package:
 \noindent Load the example data and look at some of the values.
 
 <<exdata>>=
-
 data(example.ped)
 example.ped[c(1:10,31:39),]
 data(example.geno)

@@ -1,10 +1,11 @@
 \name{NEWS}
 \title{NEWS file for the pedgene package}
-\section{Release Notes for version 3.0}{
+\section{Release Notes for version 3.3}{
   \itemize{
-    \item Add relation argument to be able to specify MZ and DZ twins
-    for kinship matrix
-    \item Add doi to description file
+    \item Allow either ped or famid as the pedigree id in ped and geno
+    datasets
+    \item Allow special relationships for family members, as in kinship2
+    package
   }
 }
 \section{Release Notes for version 2.9}{
