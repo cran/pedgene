@@ -1,10 +1,11 @@
-bfa64ace2f72a9e9d2e3f1db96e8ae26 *DESCRIPTION
+f408f6b81b4de1b3d857c8fc2867cdf7 *DESCRIPTION
 5258cc5e27045833769a13949d6c283d *NAMESPACE
 816cc10e9f730fc169fbe5658284edb5 *R/format.relation.R
 bcc576656932db0fc5dd59f65d6892cb *R/pedgene.R
 a56b6fff58ff03c6f0348981329df0ff *R/pedgene.stats.R
 d00cc2cd67fca797329828c60dadbf69 *R/pedigreeChecks.R
 f4130e254b54f63de01cd9fd871fa624 *R/quadfactor.R
+ad1301b24d874d5d003a3b131d0daa1b *build/vignette.rds
 004f2c73b285c0b60eeaca3cc77ff344 *data/example.geno.RData
 e5f85567b8e879d832aeefe7abb617e7 *data/example.map.RData
 563dcd1fda512b90df00c338601284a1 *data/example.ped.RData
@@ -12,7 +13,9 @@ e02edd99c79c67a3af94f90687e0647e *data/example.relation.RData
 d368405f1c604912f51ba286eed9944a *inst/GPL.txt
 7e16f17cc8fc46f0cc7fc591c2358cb0 *inst/LICENSE.note
 491d7182cb4dd50dcde1d0300ff15974 *inst/NEWS.Rd
-5d7156daa7b94945ec53583fa9a6fe2b *inst/doc/pedgene.pdf
+d42e1b53310b34825b4549a47bf76396 *inst/doc/pedgene.R
+0697c0dbaad6f1db9b7a52d84571d854 *inst/doc/pedgene.Rnw
+626b128a242e6093edaf31a7043b1fe9 *inst/doc/pedgene.pdf
 2c2458cae2c060e3890475111d5483a8 *man/example.geno.Rd
 876a15c515ecdd02508d56e5978539d3 *man/format.relation.Rd
 1028f54d1f8f28cea09843dd1a488bae *man/pedgene.Rd
@@ -20,7 +23,6 @@ ce20776c530a3347cdf7fed017cacc95 *man/pedigreeChecks.Rd
 cb5884a6750957e9e1a7949056dca700 *man/quadfactor.Rd
 a1d0559bb9ecf9e82730d3bdae2e2213 *tests/test.pedgene.R
 6d847f2aba25163291f1449dcbc38703 *tests/test.pedgene.Rout.save
-5ba53f494428391d61f245c3daa6535d *tests/test.pedgene.expanded.R
-d905690330fe3d451b385a4c81722bf0 *tests/test.pedgene.expanded.Rout
-8c8929d4039b884799b52c0a57ba5d7f *tests/test.pedgene.expanded.Rout.save
-f168d0a16f8440257ba2896aa7853c49 *vignettes/pedgene.Rnw
+f885f9c670ec57692a0421dfe13fdc09 *tests/test.pedgene.expanded.R
+cb511b77195eac1161a23f894a17a9cb *tests/test.pedgene.expanded.Rout.save
+0697c0dbaad6f1db9b7a52d84571d854 *vignettes/pedgene.Rnw

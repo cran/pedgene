@@ -1,11 +1,13 @@
 
-R version 3.6.2 (2019-12-12) -- "Dark and Stormy Night"
-Copyright (C) 2019 The R Foundation for Statistical Computing
+R Under development (unstable) (2022-09-11 r82834) -- "Unsuffered Consequences"
+Copyright (C) 2022 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
 Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
 
 R is a collaborative project with many contributors.
 Type 'contributors()' for more information and
@@ -40,9 +42,9 @@ Loading required package: survey
 Loading required package: grid
 Loading required package: survival
 
-Attaching package: 'survey'
+Attaching package: ‘survey’
 
-The following object is masked from 'package:graphics':
+The following object is masked from ‘package:graphics’:
 
     dotchart
 
@@ -132,9 +134,8 @@ $map
 > 
 > ## Test character ids, which is robust now because we're now making super-ids by
 > ## pasting ped-person together within the function
-> options(stringsAsFactors=FALSE)
 > char.ped <- with(example.ped, data.frame(famid=as.character(famid), person=as.character(person), father=as.character(father), mother=as.character(mother), sex=sex, trait=trait))
-> options(stringsAsFactors=TRUE)
+> 
 > 
 > ## as long as subject and ped ids are character, not factor, this will work
 > ## pedgene makes sure to not treat character as factor 
@@ -394,4 +395,4 @@ gene: ' novar ' has no markers after removing markers with all same genotype
 > 
 > proc.time()
    user  system elapsed 
-  2.439   0.165   2.985 
+  4.191   0.229   5.640 

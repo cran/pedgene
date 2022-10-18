@@ -66,9 +66,8 @@ print(pg.kounen.m2,digits=4)
 
 ## Test character ids, which is robust now because we're now making super-ids by
 ## pasting ped-person together within the function
-options(stringsAsFactors=FALSE)
 char.ped <- with(example.ped, data.frame(famid=as.character(famid), person=as.character(person), father=as.character(father), mother=as.character(mother), sex=sex, trait=trait))
-options(stringsAsFactors=TRUE)
+
 
 ## as long as subject and ped ids are character, not factor, this will work
 ## pedgene makes sure to not treat character as factor 
