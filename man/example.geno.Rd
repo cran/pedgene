@@ -20,7 +20,7 @@ data(example.relation)
 \format{
   \code{example.geno} -data frame with minor allele count for 20 variant
   positions:
-  \itemize{
+  \describe{
     \item{\code{ped }}{pedigree ID, character or numeric}
     \item{\code{person }}{person ID, used with ped to match subjects to
 	their row in example.ped}
@@ -29,7 +29,7 @@ data(example.relation)
   }
   \code{example.ped} -data frame with pedigree structure and trait
   values in the following columns:
-  \itemize{
+  \describe{
     \item{\code{ped }}{ pedigree ID, character or numeric}
     \item{\code{person }}{ person ID, a unique ID within each pedigree}
     \item{\code{father }}{father ID, 0 if no father}
@@ -45,13 +45,13 @@ data(example.relation)
         are not adjusted for covariates, in which case residuals = trait - mean(trait)}
     }
  \code{example.map } - data frame with columns for gene name and chromosome:
- \itemize{
+ \describe{
    \item{\code{chrom }}{chromosome code (1-23,X allowed) where the gene is located}
    \item{\code{gene }}{gene identifier}
  }
  \code{example.relation } - matrix specifying special relationships between pairs 
  	of individuals in the following columns:
-    \itemize{
+    \describe{
       \item{\code{ped }}{pedigree ID, character or numeric}
       \item{\code{id1 }}{person1 ID, used with ped to match subjects to
 	their row in example.ped}

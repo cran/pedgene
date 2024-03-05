@@ -1,5 +1,10 @@
 \name{NEWS}
 \title{NEWS file for the pedgene package}
+\section{Release Notes for version 3.7}{
+  \itemize{
+    \item rename format.relation as format_relation
+  }
+}
 \section{Release Notes for version 3.3}{
   \itemize{
     \item Allow either ped or famid as the pedigree id in ped and geno

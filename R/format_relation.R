@@ -7,7 +7,7 @@
 ## Created: 20190411
 ## Updated: 20190411
 
-format.relation <- function(relation)
+format_relation <- function(relation)
 
 ##Arguments:
 ##  
