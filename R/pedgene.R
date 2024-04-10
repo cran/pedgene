@@ -54,13 +54,13 @@ pedgene <- function(ped, geno,  map=NULL, male.dose=2, checkpeds=TRUE, verbose.r
   }  
   
   ## require kinship function to be recent
-  kin2v <- sessionInfo()$otherPkgs$kinship2$Version
-  if(is.null(kin2v)) {
-    kin2v <- sessionInfo()$loadedOnly$kinship2$Version
-  }
-  if(as.numeric(substring(kin2v, 1, nchar(kin2v)-2)) < 1.5) {
-    stop("kinship2 needs to be version 1.5.3 or later\n")
-  }
+#  kin2v <- sessionInfo()$otherPkgs$kinship2$Version
+#  if(is.null(kin2v)) {
+#    kin2v <- sessionInfo()$loadedOnly$kinship2$Version
+#  }
+#  if(as.numeric(substring(kin2v, 1, nchar(kin2v)-2)) < 1.5) {
+#    stop("kinship2 needs to be version 1.5.3 or later\n")
+#  }
   
   ## if no map, create one, assuming all one gene
   if(is.null(map)) {

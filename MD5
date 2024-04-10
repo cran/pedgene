@@ -1,12 +1,12 @@
-40de987ae386159f848cc41a66db7d66 *DESCRIPTION
+198d9a3a40e5506ff8ae3c1f6c4fbfd8 *DESCRIPTION
 5258cc5e27045833769a13949d6c283d *NAMESPACE
 d1d8b2e719f9e62c931278a4cac7b439 *R/format_relation.R
-bcc576656932db0fc5dd59f65d6892cb *R/pedgene.R
+2c815c0a3ab09f925b20ec0127279a16 *R/pedgene.R
 a56b6fff58ff03c6f0348981329df0ff *R/pedgene.stats.R
 d00cc2cd67fca797329828c60dadbf69 *R/pedigreeChecks.R
 f4130e254b54f63de01cd9fd871fa624 *R/quadfactor.R
 0e3d2c4245e9b0159f22f1cf763f25ae *README.md
-53e6c7e9e3508e283dc33fad82a707ac *build/vignette.rds
+14d17eae14f2bde15b39b96967954219 *build/vignette.rds
 004f2c73b285c0b60eeaca3cc77ff344 *data/example.geno.RData
 e5f85567b8e879d832aeefe7abb617e7 *data/example.map.RData
 563dcd1fda512b90df00c338601284a1 *data/example.ped.RData
@@ -16,7 +16,7 @@ d368405f1c604912f51ba286eed9944a *inst/GPL.txt
 416c4d3b4cb6c44f45037d6f68c77536 *inst/NEWS.Rd
 d42e1b53310b34825b4549a47bf76396 *inst/doc/pedgene.R
 0697c0dbaad6f1db9b7a52d84571d854 *inst/doc/pedgene.Rnw
-95343373a4e537e0bbac3528de628a38 *inst/doc/pedgene.pdf
+e56a3ac947b981347941963e46f810f3 *inst/doc/pedgene.pdf
 78bd5aed8e6cbc1ae63ac62fd6f8530d *man/example.geno.Rd
 c40027c02d57e5c1858f0694966a6634 *man/format_relation.Rd
 1028f54d1f8f28cea09843dd1a488bae *man/pedgene.Rd
